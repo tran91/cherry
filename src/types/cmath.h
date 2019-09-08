@@ -116,5 +116,6 @@ void mat4_rotate(id pid, float x, float y, float z, float radian);
 void mat4_rotate_x(id pid, float radian);
 void mat4_rotate_y(id pid, float radian);
 void mat4_rotate_z(id pid, float radian);
+void mat4_get(id pid, float m[16]);
 
 #endif

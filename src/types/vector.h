@@ -107,4 +107,17 @@ void vector_bring_to_front(id pid, unsigned index);
  */
 void vector_get_size(id pid, unsigned *s);
 
+/*
+ * @pid: vector
+ * 
+ * example:
+ *      id v;
+ *      vector_new(&v);
+ * 
+ *      ...
+ * 
+ *      vector_clear(v);
+ */
+void vector_clear(id pid);
+
 #endif

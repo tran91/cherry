@@ -4,16 +4,16 @@
 #include "opengl.h"
 #include "types/buffer.h"
 #include "types/cmath.h"
+#include "types/vector.h"
+
+static id current_program = id_null;
 
 struct vga_program
 {
     unsigned glid;
     
-    struct {
-        char enable;
-        char mask;
-        unsigned func;
-    } depth;
+    depth_opt depth;
+    stencil_opt stencil;
 };
 make_type(vga_program);
 
@@ -121,120 +121,228 @@ finish:
     release(fbuf);
 }
 
-void vga_program_begin(id pid)
+static void begin(id pid)
 {
     struct vga_program *raw;
 
-    fetch(pid, &raw);
-    assert(raw != NULL);
+    if (!id_equal(pid, current_program)) {
+        fetch(pid, &raw);
+        assert(raw != NULL);
+    
+        current_program = pid;
+        glUseProgram(raw->glid);
+    }
 }
 
-void vga_program_add_attribute(id pid, id aid, const char *name, const signed data_type, const signed size)
+static void end(id pid)
 {
+    /* depth and stencil affects global state in opengl */
+    static depth_opt current_depth;
+    static stencil_opt current_stencil;
+
     struct vga_program *raw;
 
     fetch(pid, &raw);
     assert(raw != NULL);
+
+    if (memcmp(&current_depth, &raw->depth, sizeof(depth_opt)) != 0) {
+        current_depth = raw->depth;
+        if (current_depth.enable) {
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(current_depth.mask);
+            glDepthFunc(current_depth.func);
+        } else {
+            glDisable(GL_DEPTH_TEST);
+        }
+    }
+
+    if (memcmp(&current_stencil, &raw->stencil, sizeof(stencil_opt)) != 0) {
+        current_stencil = raw->stencil;
+        if (current_stencil.enable) {
+            glEnable(GL_STENCIL_TEST);
+            glStencilOp(current_stencil.test.sfail, current_stencil.test.dpfail, current_stencil.test.dppass);
+            glStencilFunc(current_stencil.func.func, current_stencil.func.ref, current_stencil.func.mask);
+            glStencilMask(current_stencil.mask);
+        } else {
+            glDisable(GL_STENCIL_TEST);
+        }
+    }
+}
+
+void vga_program_draw_array(id pid, const draw_array_opt * const opt, ...)
+{
+    begin(pid);
+    end(pid);
+
+    
 }
 
 void vga_program_set_uniform_int(id pid, int value, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+
+    i = glGetUniformLocation(raw->glid, name);
+    glUniform1i(i, value);
 }
 
 void vga_program_set_uniform_float(id pid, float value, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+
+    i = glGetUniformLocation(raw->glid, name);
+    glUniform1f(i, value);
 }
 
 void vga_program_set_uniform_vec2_scalar(id pid, float x, float y, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+
+    i = glGetUniformLocation(raw->glid, name);
+    glUniform2f(i, x, y);
 }
 
 void vga_program_set_uniform_vec3_scalar(id pid, float x, float y, float z, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+
+    i = glGetUniformLocation(raw->glid, name);
+    glUniform3f(i, x, y, z);
 }
 
 void vga_program_set_uniform_vec4_scalar(id pid, float x, float y, float z, float w, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+
+    i = glGetUniformLocation(raw->glid, name);
+    glUniform4f(i, x, y, z, w);
 }
 
 void vga_program_set_uniform_mat4_scalar(id pid, float m[16], const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+
+    i = glGetUniformLocation(raw->glid, name);
+    glUniformMatrix4fv(i, 1, 0, m);
 }
 
 void vga_program_set_uniform_vec2(id pid, id vid, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+    float x, y;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+    i = glGetUniformLocation(raw->glid, name);
+    vec2_get(vid, &x, &y);
+    glUniform2f(i, x, y);
 }
 
 void vga_program_set_uniform_vec3(id pid, id vid, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+    float x, y, z;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+    i = glGetUniformLocation(raw->glid, name);
+    vec3_get(vid, &x, &y, &z);
+    glUniform3f(i, x, y, z);
 }
 
 void vga_program_set_uniform_vec4(id pid, id vid, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+    float x, y, z, w;
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+    i = glGetUniformLocation(raw->glid, name);
+    vec4_get(vid, &x, &y, &z, &w);
+    glUniform4f(i, x, y, z, w);
 }
 
 void vga_program_set_uniform_mat4(id pid, id vid, const char *name, const signed index)
 {
     struct vga_program *raw;
+    int i;
+    float m[16];
+
+    begin(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL);
+    i = glGetUniformLocation(raw->glid, name);
+    mat4_get(vid, m);
+    glUniformMatrix4fv(i, 1, 0, m);
 }
 
-void vga_program_set_depth(id pid, const char enable, const char mask, const char func)
+void vga_program_set_depth(id pid, const depth_opt opt)
 {
     struct vga_program *raw;
 
+    begin(pid);
+
     fetch(pid, &raw);
     assert(raw != NULL);
 
-    raw->depth.enable = enable;
-    raw->depth.mask = mask;
-    raw->depth.func = func;
+    raw->depth = opt;
 }
 
-void vga_program_end(id pid)
+void vga_program_set_stencil(id pid, const stencil_opt opt)
 {
     struct vga_program *raw;
 
+    begin(pid);
+
     fetch(pid, &raw);
     assert(raw != NULL);
+
+    raw->stencil = opt;
 }
 
 #endif

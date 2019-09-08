@@ -410,3 +410,13 @@ void mat4_rotate_z(id pid, float radian)
 {
     mat4_rotate(pid, 0, 0, 1, radian);
 }
+
+void mat4_get(id pid, float m[16])
+{
+    struct mat4 *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    memcpy(m, raw->m, sizeof(float[16]));
+}

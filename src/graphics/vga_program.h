@@ -15,15 +15,13 @@ enum {
  */
 void vga_program_load(id pid, const char *vert_path, const char *frag_path);
 
-/*
- * @pid: vga_program
- */
-void vga_program_begin(id pid);
-/*
- * @pid: vga_program
- * @aid: vga_attribute
- */
-void vga_program_add_attribute(id pid, id aid, const char *name, const signed data_type, const signed size);
+typedef struct {
+    id attr;
+    const char *name;
+    signed type;
+    signed size;
+} draw_array_opt;
+void vga_program_draw_array(id pid, const draw_array_opt * const opt, ...);
 
 /*
  * @pid: vga_program
@@ -42,11 +40,30 @@ void vga_program_set_uniform_mat4(id pid, id vid, const char *name, const signed
 /*
  * @pid: vga_program
  */
-void vga_program_set_depth(id pid, const char enable, const char mask, const char func);
+typedef struct {
+    char enable;
+    char mask;
+    unsigned func;
+} depth_opt;
+void vga_program_set_depth(id pid, const depth_opt opt);
 
 /*
  * @pid: vga_program
  */
-void vga_program_end(id pid);
+typedef struct {
+    char enable;
+    struct {
+        unsigned sfail;
+        unsigned dpfail;
+        unsigned dppass;
+    } test;
+    struct {
+        unsigned func;
+        signed ref;
+        unsigned mask;
+    } func;
+    unsigned mask;
+} stencil_opt;
+void vga_program_set_stencil(id pid, const stencil_opt opt);
 
 #endif

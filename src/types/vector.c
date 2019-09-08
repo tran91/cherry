@@ -56,6 +56,15 @@ void vector_get(id pid, unsigned index, id *cid)
     }
 }
 
+void vector_clear(id pid)
+{
+    struct vector *raw;
+    
+    fetch(pid, &raw);
+    assert(raw != NULL);
+    clear(raw);
+}
+
 void vector_remove(id pid, unsigned index)
 {
     struct vector *raw;
