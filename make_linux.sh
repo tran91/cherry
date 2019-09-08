@@ -15,7 +15,8 @@ cmake -B$BUILD_DIR/Debug -H. -G "Unix Makefiles"\
     -DCMAKE_BUILD_TYPE=Debug\
     -DCMAKE_INSTALL_PREFIX=$ARCHIVE_DIR/debug\
     -DVENDOR_DIRECTORY=$VENDOR_DIR\
-    -DVENDOR_LIBRARY=$VENDOR_DIR/build/linux/debug
+    -DVENDOR_LIBRARY=$VENDOR_DIR/build/linux/debug\
+    -DUSE_OPENGL=ON
 make install -C $BUILD_DIR/Debug
 
 mkdir -p $BUILD_DIR/Release
@@ -23,5 +24,6 @@ cmake -B$BUILD_DIR/Release -H. -G "Unix Makefiles"\
     -DCMAKE_BUILD_TYPE=Release\
     -DCMAKE_INSTALL_PREFIX=$ARCHIVE_DIR/release\
     -DVENDOR_DIRECTORY=$VENDOR_DIR\
-    -DVENDOR_LIBRARY=$VENDOR_DIR/build/linux/release
+    -DVENDOR_LIBRARY=$VENDOR_DIR/build/linux/release\
+    -DUSE_OPENGL=ON
 make install -C $BUILD_DIR/Release

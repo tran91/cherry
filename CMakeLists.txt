@@ -4,9 +4,20 @@ project (cherry C)
 # HARD COMPILE
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 
+option(USE_OPENGL "" OFF)
+option(USE_METAL "" OFF)
+option(USE_VULKAN "" OFF)
+option(USE_DX11 "" OFF)
+
+if (USE_OPENGL)
+	add_definitions(-DBUILD_OPENGL)
+endif()
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
 	#droid-opengl
-	set(OPENGL_LINK GLESv3 EGL z)
+	if(USE_OPENGL)
+		set(GRAPHIC_LINK GLESv3 EGL z)
+	endif()
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	if (${CMAKE_GENERATOR} MATCHES Xcode)
 		#ios vendor library fixes
@@ -16,28 +27,36 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		set(VENDOR_LIBRARY[variant=RelWithDebInfo] "${VENDOR_DIRECTORY}/build/ios/release")
 
 		#ios-opengl
-		find_package(OpenGL REQUIRED)
-		include_directories(${OPENGL_INCLUDE_DIRS})
-		set(OPENGL_LINK ${OPENGL_LIBRARY} z bz2)
+		if(USE_OPENGL)
+			find_package(OpenGL REQUIRED)
+			include_directories(${OPENGL_INCLUDE_DIRS})
+			set(GRAPHIC_LINK ${OPENGL_LIBRARY} z bz2)
+		endif()
 	else()
 		#osx-opengl
-		include_directories(/System/Library/Frameworks)
-		find_package(OpenGL REQUIRED)
-		include_directories(${OPENGL_INCLUDE_DIRS})
-		set(OPENGL_LINK ${OPENGL_LIBRARY} z bz2)
+		if(USE_OPENGL)
+			include_directories(/System/Library/Frameworks)
+			find_package(OpenGL REQUIRED)
+			include_directories(${OPENGL_INCLUDE_DIRS})
+			set(GRAPHIC_LINK ${OPENGL_LIBRARY} z bz2)
+		endif()
 	endif()
 elseif (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 	set(CMAKE_C_COMPILER "emcc")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_ZLIB=1")
 	#emscripten-opengl
-	find_package(OpenGL REQUIRED)
-	include_directories(${OPENGL_INCLUDE_DIRS})
-	set(OPENGL_LINK ${OPENGL_LIBRARY})
+	if(USE_OPENGL)
+		find_package(OpenGL REQUIRED)
+		include_directories(${OPENGL_INCLUDE_DIRS})
+		set(GRAPHIC_LINK ${OPENGL_LIBRARY})
+	endif()
 else()
 	#linux-opengl
-	find_package(OpenGL REQUIRED)
-	include_directories(${OPENGL_INCLUDE_DIRS})
-	set(OPENGL_LINK ${OPENGL_LIBRARY} z)
+	if(USE_OPENGL)
+		find_package(OpenGL REQUIRED)
+		include_directories(${OPENGL_INCLUDE_DIRS})
+		set(GRAPHIC_LINK ${OPENGL_LIBRARY} z)
+	endif()
 endif()
 
 # ADD VENDOR LIBRARIES
@@ -95,19 +114,21 @@ endif()
 install (TARGETS cherry
 	ARCHIVE DESTINATION .)
 
-if(NOT ${CMAKE_GENERATOR} MATCHES Xcode
-	AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten"
-	AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
+if (USE_OPENGL)
+	if(NOT ${CMAKE_GENERATOR} MATCHES Xcode
+		AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten"
+		AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
 
-	if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-        set(CMAKE_EXECUTABLE_SUFFIX ".html")
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_SDL=2 --use-preload-plugins --preload-file ../../../data@")
-		set(OPENGL_APPLICATION )
-    else()
-            set(OPENGL_APPLICATION SDL2)
-    endif()
+		if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+			set(CMAKE_EXECUTABLE_SUFFIX ".html")
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_SDL=2 --use-preload-plugins --preload-file ../../../data@")
+			set(OPENGL_APPLICATION )
+		else()
+			set(OPENGL_APPLICATION SDL2)
+		endif()
 
-    add_executable(test "test/main.c")
-    add_dependencies(test cherry ${OPENGL_APPLICATION})
-	target_link_libraries(test cherry ${OPENGL_APPLICATION})
+		add_executable(test "test/main.c")
+		add_dependencies(test cherry ${OPENGL_APPLICATION})
+		target_link_libraries(test cherry ${OPENGL_APPLICATION})
+	endif()
 endif()
