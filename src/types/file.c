@@ -107,6 +107,17 @@ static void init(struct file *p, key k)
     p->type = DESKTOP_FILE;
 }
 
+void file_open(id pid, const char *path)
+{
+    struct file *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+    clear(raw);
+
+    init(raw, key_chars(path));
+}
+
 void file_write(id pid, void *buf, unsigned len)
 {
     struct file *raw;
@@ -116,13 +127,13 @@ void file_write(id pid, void *buf, unsigned len)
     fwrite(buf, 1, len, raw->ptr);
 }
 
-void file_read(id pid, char buf[8192], unsigned *read)
+void file_read(id pid, unsigned char *buf, unsigned len, unsigned *read)
 {
     struct file *raw;
 
     fetch(pid, &raw);
     assert(raw != NULL);
-    *read = fread(buf, 1, 8192, raw->ptr);
+    *read = fread(buf, 1, len, raw->ptr);
 }
 
 void file_seek(id pid, unsigned offset)

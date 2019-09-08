@@ -8,20 +8,21 @@ struct buffer
 };
 make_type(buffer);
 
-static void load_file(struct buffer *p, key k)
+static void load_file(struct buffer *p, const char *path)
 {
     id fid;
-    char buf[8192];
+    unsigned char buf[8192];
     unsigned count;
 
-    file_shared(k, &fid);
-    file_seek(fid, 0);
-    file_read(fid, buf, &count);
+    file_new(&fid);
+    file_open(fid, path);
+    file_read(fid, buf, 8192, &count);
     while (count > 0) {
-        p->ptr = realloc(p->ptr, p->len + count);
+        p->ptr = realloc(p->ptr, p->len + count + 1);
         memcpy(p->ptr + p->len, buf, count);
         p->len += count;
-        file_read(fid, buf, &count);
+        p->ptr[p->len] = '\0';
+        file_read(fid, buf, 8192, &count);
     }
     release(fid);
 }
@@ -35,7 +36,7 @@ static void init(struct buffer *p, key k)
 
     if (strncmp(k.ptr, "inner://", sizeof("inner://") - 1) == 0
         || strncmp(k.ptr, "local://", sizeof("local://") - 1) == 0) {
-        load_file(p, k);
+        load_file(p, k.ptr);
     }
 }
 
@@ -55,6 +56,16 @@ void buffer_clear(id pid)
     fetch(pid, &raw);
     assert(raw != NULL);
     raw->len = 0;
+}
+
+void buffer_append_file(id pid, const char *path)
+{
+    struct buffer *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    load_file(raw, path);
 }
 
 void buffer_append(id pid, const void *buf, const unsigned len)

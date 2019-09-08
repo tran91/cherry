@@ -84,7 +84,7 @@ static void clear(struct map *p)
                     *n = c->next;
                     release(c->object);
                     if (c->k.type == KEY_LITERAL) {
-                        free(c->k.ptr);
+                        free((void *)c->k.ptr);
                     }
                     free(c);
                     c = *n;
@@ -193,8 +193,8 @@ create:
     switch (k.type) {
     case KEY_LITERAL:
         n->k.ptr = malloc(k.len + 1);
-        memcpy(n->k.ptr, k.ptr, k.len);
-        n->k.ptr[k.len] = '\0'; 
+        memcpy((void *)n->k.ptr, k.ptr, k.len);
+        ((char *)n->k.ptr)[k.len] = '\0'; 
         break;
     case KEY_ID:
         n->k.kid = k.kid;
@@ -243,7 +243,7 @@ void __remove(struct map *p, key k)
                             e->list[h] = c->next;
                         }
                         release(c->object);
-                        free(c->k.ptr);
+                        free((void *)c->k.ptr);
                         free(c);              
                         e->count--;
                         p->flag[i] = 1;

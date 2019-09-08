@@ -13,6 +13,11 @@ void buffer_clear(id pid);
 /*
  * @pid: buffer
  */
+void buffer_append_file(id pid, const char *path);
+
+/*
+ * @pid: buffer
+ */
 void buffer_append(id pid, const void *buf, const unsigned len);
 
 /*

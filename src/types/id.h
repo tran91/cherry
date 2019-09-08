@@ -43,13 +43,14 @@ typedef struct key
     char type;
     union {
         struct {
-            char *ptr;
+            const char *ptr;
             unsigned len;
         };
         id kid;
     };
 } key;
 
+#define key_chars(p) (key){.type = KEY_LITERAL, .ptr = p, .len = strlen(p)} 
 #define key_literal(p) (key){.type = KEY_LITERAL, .ptr = p, .len = sizeof(p) - 1}
 #define key_id(p) (key){.type = KEY_ID, .kid = p}
 #define key_null (key){.type = 0} 

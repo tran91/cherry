@@ -3,7 +3,11 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/vendor/png/include",
+                "${workspaceFolder}/vendor/jpeg/include",
+                "${workspaceFolder}/vendor/zip/include",
+                "${workspaceFolder}/vendor/freetype/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",
