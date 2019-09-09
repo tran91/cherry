@@ -101,7 +101,7 @@ else()
 endif()
 
 add_library(cherry STATIC ${SOURCES})
-target_link_libraries(cherry png jpeg zip freetype m pthread ssl crypto)
+target_link_libraries(cherry png jpeg zip freetype m pthread ssl crypto ${GRAPHIC_LINK})
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Release" AND ${CMAKE_SYSTEM_NAME} MATCHES "Android")
 	add_custom_command(
@@ -127,8 +127,12 @@ if (USE_OPENGL)
 			set(OPENGL_APPLICATION SDL2)
 		endif()
 
-		add_executable(test "test/main.c")
-		add_dependencies(test cherry ${OPENGL_APPLICATION})
-		target_link_libraries(test cherry ${OPENGL_APPLICATION})
+		add_executable(test_https "test/test_https.c")
+		add_dependencies(test_https cherry ${OPENGL_APPLICATION})
+		target_link_libraries(test_https cherry ${OPENGL_APPLICATION})
+
+		add_executable(test_graphic "test/test_graphic.c")
+		add_dependencies(test_graphic cherry ${OPENGL_APPLICATION})
+		target_link_libraries(test_graphic cherry ${OPENGL_APPLICATION})
 	endif()
 endif()

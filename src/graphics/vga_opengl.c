@@ -40,6 +40,10 @@ const unsigned VGA_INT = GL_INT;
 const unsigned VGA_ARRAY = GL_ARRAY_BUFFER;
 const unsigned VGA_ELEMENT = GL_ELEMENT_ARRAY_BUFFER;
 
+const unsigned VGA_STATIC = GL_STATIC_DRAW;
+const unsigned VGA_DYNAMIC = GL_DYNAMIC_DRAW;
+const unsigned VGA_STREAM = GL_STREAM_DRAW;
+
 const unsigned VGA_TRIANGLES = GL_TRIANGLES;
 
 const unsigned VGA_ALWAYS = GL_ALWAYS;
@@ -81,6 +85,9 @@ const unsigned VGA_CW = GL_CW;
 
 const unsigned VGA_FALSE = GL_FALSE;
 const unsigned VGA_TRUE = GL_TRUE;
+
+const unsigned VGA_RGBA = GL_RGBA;
+const unsigned VGA_RGB = GL_RGB;
 
 /*
  * attribute
@@ -612,24 +619,9 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
     p->depth_stencil_complete = 1;
 }
 
-static void vga_framebuffer_require(id fb)
-{
-    struct vga_framebuffer *raw;
-
-    fetch(fb, &raw);
-    assert(raw != NULL);
-
-    if (raw->resolver.created == 0) {
-        raw->resolver.created = 1;
-        glGenFramebuffers(1, &raw->resolver.glid);
-    }
-}
-
 void vga_framebuffer_set_size(id pid, unsigned width, unsigned height)
 {
     struct vga_framebuffer *raw;
-
-    vga_framebuffer_require(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL && width > 0 && height > 0 && raw->resolver.created != 2);
@@ -646,8 +638,6 @@ void vga_framebuffer_set_depth(id pid, char depth, char stencil)
 {
     struct vga_framebuffer *raw;
 
-    vga_framebuffer_require(pid);
-
     fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
@@ -663,8 +653,6 @@ void vga_framebuffer_set_multisampling(id pid, unsigned char samples)
 {
     struct vga_framebuffer *raw;
 
-    vga_framebuffer_require(pid);
-
     fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
@@ -676,8 +664,6 @@ void vga_framebuffer_add_texture(id pid, const char *name)
 {
     struct vga_framebuffer *raw;
     id tmp;
-
-    vga_framebuffer_require(pid);
 
     fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
@@ -722,6 +708,7 @@ make_type_detail(vga_program);
 
 static void vga_program_init(struct vga_program *p, key k)
 {
+    memset(p, 0, sizeof(struct vga_program));
     p->glid = 0;
 }
 
