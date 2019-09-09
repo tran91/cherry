@@ -59,8 +59,6 @@ void vector_set(id pid, unsigned index, id cid)
         raw->len = index + 1;
     }
 
-    assert(index < raw->len);
-
     retain(cid);
     oid = raw->start[index];
     raw->start[index] = cid;
