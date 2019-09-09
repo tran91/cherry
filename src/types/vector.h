@@ -22,6 +22,8 @@ type(vector);
  */
 void vector_push(id pid, id cid);
 
+void vector_set(id pid, unsigned index, id cid);
+
 /*
  * @pid: vector
  * 

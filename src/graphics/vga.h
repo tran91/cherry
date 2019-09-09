@@ -55,6 +55,9 @@ extern const unsigned VGA_CW;
 extern const unsigned VGA_FALSE;
 extern const unsigned VGA_TRUE;
 
+extern const unsigned VGA_RGBA;
+extern const unsigned VGA_RGB;
+
 type(vga_attribute);
 /*
  * @pid: vga_attribute
@@ -82,11 +85,17 @@ type(vga_texture);
 void vga_texture_get_width(id pid, unsigned *width);
 void vga_texture_get_height(id pid, unsigned *height);
 void vga_texture_load_file(id pid, const char *path);
+void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned internal_format, unsigned format, const void *ptr);
 
 /*
  * framebuffer
  */
 type(vga_framebuffer);
+void vga_framebuffer_set_size(id pid, unsigned width, unsigned height);
+void vga_framebuffer_set_depth(id pid, char depth, char stencil);
+void vga_framebuffer_set_multisampling(id pid, unsigned char samples);
+void vga_framebuffer_add_texture(id pid, const char *name);
+void vga_framebuffer_get_texture(id pid, const char *name, id *tex);
 
 /*
  * program

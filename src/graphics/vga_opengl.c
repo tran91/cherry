@@ -5,6 +5,7 @@
 #include "types/buffer.h"
 #include "types/cmath.h"
 #include "types/vector.h"
+#include "types/buffer.h"
 
 #if OS == IOS
     #define GL_GLEXT_PROTOTYPES
@@ -185,26 +186,29 @@ void vga_attribute_group_add(id pid, id attr, const char *name, signed data_type
  */
 struct vga_texture
 {
-    unsigned glid;
+    unsigned glid;    
     unsigned width;
     unsigned height;
+    char created;
 };
 make_type_detail(vga_texture);
 
 static void vga_texture_init(struct vga_texture *p, key k)
 {
-    p->glid = 0;
+    glGenTextures(1, &p->glid);
+    p->created = 1;
     p->width = 0;
     p->height = 0;
 }
 
 static void vga_texture_clear(struct vga_texture *p)
 {
-    if (p->glid > 0) {
+    if (p->created) {
         glDeleteTextures(1, &p->glid);
         p->glid = 0;
         p->width = 0;
         p->height = 0;
+        p->created = 0;
     }
 }
 
@@ -238,9 +242,6 @@ void vga_texture_load_file(id pid, const char *path)
     fetch(pid, &raw);
     assert(raw != NULL);
 
-    vga_texture_clear(raw);
-    glGenTextures(1, &raw->glid);
-
     image_new(&img);
     image_load_file(img, path);
     image_get_size(img, &raw->width, &raw->height);
@@ -266,6 +267,440 @@ void vga_texture_load_file(id pid, const char *path)
     glBindTexture(GL_TEXTURE_2D, 0);
 
     release(img);
+}
+
+void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned internal_format, unsigned format, const void *ptr)
+{
+    struct vga_texture *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    raw->width = width;
+    raw->height = height;
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, raw->glid);
+    if (format == VGA_RGBA) {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, raw->width, raw->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, ptr);
+    } else if (format == VGA_RGB) {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, raw->width, raw->height, 0, GL_RGB, GL_UNSIGNED_BYTE, ptr);
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+/*
+ * renderbuffer
+ */
+struct vga_renderbuffer
+{
+    unsigned glid;
+    unsigned width;
+    unsigned height;
+    char created;
+};
+make_type_detail(vga_renderbuffer);
+
+static void vga_renderbuffer_init(struct vga_renderbuffer *p, key k)
+{
+    glGenRenderbuffers(1, &p->glid);
+    p->created = 1;
+    p->width = 0;
+    p->height = 0;
+}
+
+static void vga_renderbuffer_clear(struct vga_renderbuffer *p)
+{
+    if (p->created) {
+        glDeleteRenderbuffers(1, &p->glid);
+        p->created = 0;
+        p->width = 0;
+        p->height = 0;
+    }
+}
+
+/*
+ * framebuffer
+ */
+struct vga_framebuffer
+{
+    unsigned width;
+    unsigned height;
+
+    struct {
+        unsigned glid;
+        unsigned created;
+        id mtexs;
+        id vtexs;
+    } resolver;
+
+    struct {
+        unsigned glid;
+        unsigned created;
+        id mrens;
+        id vrens;
+        unsigned samples;
+        unsigned build_samples;
+    } sampler;
+
+    id vnames;
+
+    id depth_stencil;    
+    char has_depth;
+    char has_stencil;
+    char depth_stencil_complete;
+};
+make_type_detail(vga_framebuffer);
+
+static void vga_framebuffer_init(struct vga_framebuffer *p, key k)
+{
+    p->resolver.glid = 0;
+    p->resolver.created = 0;
+    map_new(&p->resolver.mtexs);
+    vector_new(&p->resolver.vtexs);
+
+    p->sampler.glid = 0;
+    p->sampler.created = 0;
+    map_new(&p->sampler.mrens);
+    vector_new(&p->sampler.vrens);
+    p->sampler.samples = 0;
+    p->sampler.build_samples = 0;
+    
+    vector_new(&p->vnames);
+
+    p->width = 0;
+    p->height = 0;
+    p->depth_stencil = id_null;
+    p->has_depth = 0;
+    p->has_stencil = 0;
+    p->depth_stencil_complete = 0;
+}
+
+static void vga_framebuffer_clear(struct vga_framebuffer *p)
+{
+    if (p->resolver.created == 1) {
+        glDeleteFramebuffers(1, &p->resolver.glid);
+        p->resolver.created = 0;
+    }
+    release(p->resolver.mtexs);
+    release(p->resolver.vtexs);
+
+    if (p->sampler.created == 1) {
+        glDeleteFramebuffers(1, &p->sampler.glid);
+        p->sampler.created = 0;
+    }
+    release(p->sampler.mrens);
+    release(p->sampler.vrens);
+    p->sampler.samples = 0;
+
+    release(p->vnames);
+
+    p->width = 0;
+    p->height = 0;
+    release(p->depth_stencil);
+    p->has_depth = 0;
+    p->has_stencil = 0;
+    p->depth_stencil_complete = 0;
+}
+
+static void vga_framebuffer_build(struct vga_framebuffer *p)
+{
+    struct vga_renderbuffer *vrb;
+    struct vga_texture *vtx;
+    int i, flag;
+    id tex, name, ren;
+    unsigned len;
+    const char *ptr;
+    unsigned attachments[32] = {GL_NONE};
+
+    if (p->width == 0 || p->height == 0) return;
+
+    /* build resolver framebuffer */
+    if (p->resolver.created == 0) {
+        glGenFramebuffers(1, &p->resolver.glid);
+        p->resolver.created = 1;
+    }
+
+    /* build sampler framebuffer */
+    if (p->sampler.samples != p->sampler.build_samples) {
+        if (p->sampler.build_samples == 0) {
+            p->sampler.samples = 0;
+            if (p->sampler.created == 1) {
+                glDeleteFramebuffers(1, &p->sampler.glid);
+                p->sampler.created = 0;
+            }
+            map_clear(p->sampler.mrens);
+            vector_clear(p->sampler.vrens);
+            p->sampler.samples = 0;
+        } else {
+            if (p->sampler.created == 0) {
+                p->sampler.created = 1;
+                glGenFramebuffers(1, &p->sampler.glid);
+            }
+            p->sampler.samples = p->sampler.build_samples;
+        }
+    }
+
+    /* check resolver textures */
+    flag = 0;
+    for (i = 0;;i++) {
+        vector_get(p->vnames, i, &name);
+        if (!id_validate(name)) break;
+
+        buffer_get_ptr(name, &ptr);
+        map_get(p->resolver.mtexs, key_chars(ptr), &tex);
+        if (id_validate(tex)) {
+            fetch(tex, &vtx);
+            if (vtx->width != p->width || vtx->height != p->height) {
+                vga_texture_load_raw(tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);                
+            }
+        } else {
+            vga_texture_new(&tex);
+            vga_texture_load_raw(tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);
+            map_set(p->resolver.mtexs, key_chars(ptr), tex);
+            vector_push(p->resolver.vtexs, tex);
+            release(tex);
+
+            fetch(tex, &vtx);
+            vector_get_size(p->resolver.vtexs, &len);
+            glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
+            glBindTexture(GL_TEXTURE_2D, vtx->glid);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + len - 1, GL_TEXTURE_2D, vtx->glid, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            flag = 1;
+        }
+    }
+    if (flag) {
+        vector_get_size(p->resolver.vtexs, &len);
+        for (i = 0; i < len; ++i) {
+            attachments[i] = GL_COLOR_ATTACHMENT0 + i;
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
+        glDrawBuffers(len, attachments);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        flag = 0;
+    }
+
+    /* check sampler renderers */
+    flag = 0;
+    if (p->sampler.created > 0) {
+        for (i = 0;;i++) {
+            vector_get(p->vnames, i, &name);
+            if (!id_validate(name)) break;
+
+            buffer_get_ptr(name, &ptr);
+            map_get(p->sampler.mrens, key_chars(ptr), &ren);
+            if (id_validate(ren)) {
+                fetch(ren, &vrb);
+                if (vrb->width != p->width || vrb->height != p->height) {                    
+                    vrb->width = p->width;
+                    vrb->height = p->height;
+                    glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
+                    glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_RGBA8, p->width, p->height);
+                    glBindRenderbuffer(GL_RENDERBUFFER, 0);                          
+                }
+            } else {
+                vga_renderbuffer_new(&ren);
+                fetch(ren, &vrb);
+                vrb->width = p->width;
+                vrb->height = p->height;
+                glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
+                glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_RGBA8, p->width, p->height);
+                glBindRenderbuffer(GL_RENDERBUFFER, 0);  
+                map_set(p->sampler.mrens, key_chars(ptr), ren);
+                vector_push(p->sampler.vrens, ren);
+                release(ren);
+
+                vector_get_size(p->sampler.vrens, &len);
+                glBindFramebuffer(GL_FRAMEBUFFER, p->sampler.glid);
+                glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + len - 1, GL_RENDERBUFFER, vrb->glid);
+                glBindRenderbuffer(GL_RENDERBUFFER, 0);
+                glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                flag = 1;
+            }
+        }
+        if (flag) {
+            vector_get_size(p->sampler.vrens, &len);
+            for (i = 0; i < len; ++i) {
+                attachments[i] = GL_COLOR_ATTACHMENT0 + i;
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, p->sampler.glid);
+            glDrawBuffers(len, attachments);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            flag = 0;
+        }
+    }
+
+    /* build depth */
+    if (p->depth_stencil_complete) return;
+    if (p->has_depth || p->has_stencil) {
+        fetch(p->depth_stencil, &vrb);
+        if (!vrb) {
+            vga_renderbuffer_new(&p->depth_stencil);
+            fetch(p->depth_stencil, &vrb);
+        }
+        if (p->sampler.created == 1) {
+            /* detach resolver depth buffer */
+            glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,GL_RENDERBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            /* attach sampler depth buffer */
+            glBindFramebuffer(GL_FRAMEBUFFER, p->sampler.glid);
+            glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
+            if (vrb->width != p->width || vrb->height != p->height) {
+                glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_DEPTH24_STENCIL8, p->width, p->height);
+                vrb->width = p->width;
+                vrb->height = p->height;
+            }            
+            if(p->has_depth) {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, vrb->glid);
+            } else {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+            }
+            if(p->has_stencil) {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, vrb->glid);
+            } else {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        } else {
+            /* attach resolver depth buffer */
+            glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
+            glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
+            if (vrb->width != p->width || vrb->height != p->height) {
+                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, p->width, p->height);
+                vrb->width = p->width;
+                vrb->height = p->height;
+            }            
+            if(p->has_depth) {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, vrb->glid);
+            } else {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+            }
+            if(p->has_stencil) {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, vrb->glid);
+            } else {
+                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+            }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+    } else {
+        release(p->depth_stencil);
+        if (p->resolver.created == 1) {
+            glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,GL_RENDERBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+        if (p->sampler.created == 1) {
+            glBindFramebuffer(GL_FRAMEBUFFER, p->sampler.glid);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,GL_RENDERBUFFER, 0);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+    }
+    p->depth_stencil_complete = 1;
+}
+
+static void vga_framebuffer_require(id fb)
+{
+    struct vga_framebuffer *raw;
+
+    fetch(fb, &raw);
+    assert(raw != NULL);
+
+    if (raw->resolver.created == 0) {
+        raw->resolver.created = 1;
+        glGenFramebuffers(1, &raw->resolver.glid);
+    }
+}
+
+void vga_framebuffer_set_size(id pid, unsigned width, unsigned height)
+{
+    struct vga_framebuffer *raw;
+
+    vga_framebuffer_require(pid);
+
+    fetch(pid, &raw);
+    assert(raw != NULL && width > 0 && height > 0 && raw->resolver.created != 2);
+
+    if (raw->width == width && raw->height == height) return;
+    raw->width = width;
+    raw->height = height;
+    raw->depth_stencil_complete = 0;
+
+    vga_framebuffer_build(raw);
+}
+
+void vga_framebuffer_set_depth(id pid, char depth, char stencil)
+{
+    struct vga_framebuffer *raw;
+
+    vga_framebuffer_require(pid);
+
+    fetch(pid, &raw);
+    assert(raw != NULL && raw->resolver.created != 2);
+
+    if (raw->has_depth == depth && raw->has_depth == stencil) return;
+    raw->has_depth = depth;
+    raw->has_stencil = stencil;
+    raw->depth_stencil_complete = 0;
+
+    vga_framebuffer_build(raw);
+}
+
+void vga_framebuffer_set_multisampling(id pid, unsigned char samples)
+{
+    struct vga_framebuffer *raw;
+
+    vga_framebuffer_require(pid);
+
+    fetch(pid, &raw);
+    assert(raw != NULL && raw->resolver.created != 2);
+
+    raw->sampler.build_samples = samples;
+    vga_framebuffer_build(raw);
+}
+
+void vga_framebuffer_add_texture(id pid, const char *name)
+{
+    struct vga_framebuffer *raw;
+    id tmp;
+
+    vga_framebuffer_require(pid);
+
+    fetch(pid, &raw);
+    assert(raw != NULL && raw->resolver.created != 2);
+
+    map_get(raw->resolver.mtexs, key_chars(name), &tmp);
+    if (!id_validate(tmp)) {
+        buffer_new(&tmp);
+        buffer_append(tmp, name, strlen(name));
+        vector_push(raw->vnames, tmp);
+        release(tmp);
+
+        vga_framebuffer_build(raw);
+    }
+}
+
+void vga_framebuffer_get_texture(id pid, const char *name, id *tex)
+{
+    struct vga_framebuffer *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL && raw->resolver.created != 2);
+
+    map_get(raw->resolver.mtexs, key_chars(name), tex);
 }
 
 /*

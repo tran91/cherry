@@ -42,6 +42,31 @@ void vector_push(id pid, id cid)
     retain(cid);
 }
 
+void vector_set(id pid, unsigned index, id cid)
+{    
+    struct vector *raw;
+    id oid;
+    int i;
+    
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    if (index >= raw->len) {
+        raw->start = realloc(raw->start, sizeof(id) * (index + 1));
+        for (i = raw->len; i <= index; ++i) {
+            raw->start[i] = id_null;
+        }
+        raw->len = index + 1;
+    }
+
+    assert(index < raw->len);
+
+    retain(cid);
+    oid = raw->start[index];
+    raw->start[index] = cid;
+    release(oid);
+}
+
 void vector_get(id pid, unsigned index, id *cid)
 {
     struct vector *raw;
