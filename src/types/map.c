@@ -329,6 +329,15 @@ void map_new(id *map)
     build(*map, key_null);
 }
 
+void map_get_size(id map, unsigned *size)
+{
+    struct map *raw;
+    
+    fetch(map, &raw);
+    assert(raw != NULL);
+    *size = raw->count;
+}
+
 void map_set(id map, key k, id object)
 {
     struct map *raw;
@@ -376,4 +385,13 @@ void map_iterate(id map, unsigned index, key *k, id *object)
         *k = raw->ctr[index]->k;
         *object = raw->ctr[index]->object;
     }
+}
+
+void map_clear(id map)
+{
+    struct map *raw;
+    
+    fetch(map, &raw);
+    assert(raw != NULL);
+    clear(raw);
 }

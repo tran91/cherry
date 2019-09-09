@@ -5,12 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdarg.h>
 #include <assert.h>
 #include <math.h>
 #include <time.h>
 #include <unistd.h>
 #include <errno.h>
 #include <sys/stat.h>
+
+#define ARGS(...) __VA_ARGS__
 
 /* spin lock */
 static inline void lock(volatile unsigned *l)
