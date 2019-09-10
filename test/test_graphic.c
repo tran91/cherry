@@ -118,6 +118,7 @@ int main(int argc, char **argv)
     SDL_DisplayMode DM;
     unsigned width = 800;
     unsigned height = 480;
+    signed glid;
 
     SDL_Init(SDL_INIT_VIDEO);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -129,8 +130,10 @@ int main(int argc, char **argv)
     glcontext = SDL_GL_CreateContext(glwindow);
     SDL_SetWindowSize(glwindow, width, height);
 
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &glid);
+
     tester_new(&tstr);
-    tester_setup(tstr, width, height, 0);
+    tester_setup(tstr, width, height, glid);
     while (1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT || (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE)) {

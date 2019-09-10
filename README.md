@@ -1,6 +1,40 @@
 # Cherry
-
 Cherry is a programming framework written in C
+
+## Build
+```bash
+#require SDL2
+
+#linux
+sudo apt-get install libsdl2-dev libsdl2-2.0-0
+
+#osx
+brew install sdl2
+```
+```bash
+#require OpenSSL
+```
+```bash
+#require vendor
+git clone https://github.com/tran91/vendor.git
+cd vendor
+bash make.sh linux
+
+#need $VENDOR_HOME to build cherry
+export VENDOR_HOME=[full_path_of_vendor_directory]
+```
+```bash
+#build cherry
+git clone https://github.com/tran91/cherry.git
+cd cherry
+bash make_linux.sh
+
+#try one of these testings
+./build/linux/Debug/test_xml
+./build/linux/Debug/test_graphic
+./build/linux/Debug/test_https server
+./build/linux/Debug/test_https client
+```
 
 ## Model
 
@@ -25,7 +59,7 @@ void release(id pid); /* decrease memory counter held by id by 1 */
 void fetch(id pid, void *ptr); /* get memory held by id */
 ```
 
-## EXAMPLE
+## Example
 ```C
 /*
  * your_data.h
