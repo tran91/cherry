@@ -2,9 +2,9 @@
     <element tag="tag1">Hello</element>
     <element tag="tag2">World</element>
     <style>
-        <element tag="tag3">From</element>
+        <element tag="tag3" opt="1">From</element>
         <style>
-            <element tag="tag4">Cherry</element>
+            <element tag="tag4" opt="1">Cherry</element>
             
             <element-exclusive tag="tag5"></element-exclusive>
         </style>

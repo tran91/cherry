@@ -791,7 +791,14 @@ static void __block_attribute(const char *start, const char *end,
 				ptr++;
 				break;
 			case ' ': case '\t': case '\n':
-			case '\v': case '\f': case '\r':
+			case '\v': case '\f': case '\r': case ']':
+                if (*name[0]) {
+                    name[1] = ptr - 1;
+                    goto assign;
+                } else {
+                    ptr++;
+                    break;
+                }
 			case '=':
 				if(*name[0]) {
 					name[1] = ptr - 1;
