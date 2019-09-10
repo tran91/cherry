@@ -7,13 +7,13 @@ struct vector
 };
 make_type(vector);
 
-static void init(struct vector *p, key k)
+static void vector_init(struct vector *p, key k)
 {
     p->start = NULL;
     p->len = 0;
 }
 
-static void clear(struct vector *p)
+static void vector_clear(struct vector *p)
 {
     id cid;
 
@@ -33,7 +33,7 @@ void vector_push(id pid, id cid)
 {
     struct vector *raw;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     raw->start = realloc(raw->start, sizeof(id) * (raw->len + 1));
@@ -47,8 +47,8 @@ void vector_push_vector(id pid, id cid)
     struct vector *r1, *r2;
     int i;
     
-    fetch(pid, &r1);
-    fetch(cid, &r2);
+    vector_fetch(pid, &r1);
+    vector_fetch(cid, &r2);
     assert(r1 != NULL && r2 != NULL);
 
     if (r2->len == 0) return;
@@ -67,7 +67,7 @@ void vector_set(id pid, unsigned index, id cid)
     id oid;
     int i;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (index >= raw->len) {
@@ -88,7 +88,7 @@ void vector_get(id pid, unsigned index, id *cid)
 {
     struct vector *raw;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (raw->len <= index) {
@@ -98,13 +98,13 @@ void vector_get(id pid, unsigned index, id *cid)
     }
 }
 
-void vector_clear(id pid)
+void vector_remove_all(id pid)
 {
     struct vector *raw;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
-    clear(raw);
+    vector_clear(raw);
 }
 
 void vector_remove(id pid, unsigned index)
@@ -112,7 +112,7 @@ void vector_remove(id pid, unsigned index)
     struct vector *raw;
     id cid;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (raw->len <= index) return;
@@ -131,7 +131,7 @@ void vector_remove_id(id pid, id obj)
     int i;
     id cid;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     for (i = 0; i < raw->len; ++i) {
@@ -152,7 +152,7 @@ void vector_swap(id pid, unsigned idx1, unsigned idx2)
     struct vector *raw;
     id cid;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (raw->len <= idx1 || raw->len <= idx2 || idx1 == idx2) return;
@@ -166,7 +166,7 @@ void vector_get_size(id pid, unsigned *s)
 {
     struct vector *raw;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     *s = raw->len;
@@ -177,7 +177,7 @@ void vector_bring_to_back(id pid, unsigned index)
     struct vector *raw;
     id cid;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (raw->len <= index || index == raw->len - 1) return;
@@ -192,7 +192,7 @@ void vector_bring_to_front(id pid, unsigned index)
     struct vector *raw;
     id cid;
     
-    fetch(pid, &raw);
+    vector_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (index == 0 || raw->len <= index) return;

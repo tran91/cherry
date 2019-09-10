@@ -8,7 +8,7 @@ type(buffer);
 /*
  * @pid: buffer
  */
-void buffer_clear(id pid);
+void buffer_erase(id pid);
 
 /*
  * @pid: buffer

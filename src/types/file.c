@@ -24,7 +24,7 @@ enum {
     ANDROID_EXTERNAL
 };
 
-static void clear(struct file *p)
+static void file_clear(struct file *p)
 {
     if (p->ptr) {
         #if OS == LINUX || OS == OSX
@@ -86,7 +86,7 @@ static void path(const char *url, const char **p, const char **mode)
     }
 }
 
-static void init(struct file *p, key k)
+static void file_init(struct file *p, key k)
 {
     const char *pth;
     const char *mode;
@@ -111,18 +111,18 @@ void file_open(id pid, const char *path)
 {
     struct file *raw;
 
-    fetch(pid, &raw);
+    file_fetch(pid, &raw);
     assert(raw != NULL);
-    clear(raw);
+    file_clear(raw);
 
-    init(raw, key_chars(path));
+    file_init(raw, key_chars(path));
 }
 
 void file_write(id pid, void *buf, unsigned len)
 {
     struct file *raw;
 
-    fetch(pid, &raw);
+    file_fetch(pid, &raw);
     assert(raw != NULL);
     fwrite(buf, 1, len, raw->ptr);
 }
@@ -131,7 +131,7 @@ void file_read(id pid, unsigned char *buf, unsigned len, unsigned *read)
 {
     struct file *raw;
 
-    fetch(pid, &raw);
+    file_fetch(pid, &raw);
     assert(raw != NULL);
     *read = fread(buf, 1, len, raw->ptr);
 }
@@ -140,7 +140,7 @@ void file_seek(id pid, unsigned offset)
 {
     struct file *raw;
 
-    fetch(pid, &raw);
+    file_fetch(pid, &raw);
     assert(raw != NULL);
     fseek(raw->ptr, offset, SEEK_SET);
 }

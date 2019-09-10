@@ -25,8 +25,8 @@ struct xml_attribute
     id node;
 };
 
-make_type_detail(xml_attribute);
-make_type_detail(xml_node);
+make_type(xml_attribute);
+make_type(xml_node);
 
 static void xml_node_init(struct xml_node *p, key k)
 {
@@ -48,7 +48,7 @@ static void xml_node_clear(struct xml_node *p)
 void xml_node_get_parent(id pid, id *rid)
 {
     struct xml_node *raw;
-    fetch(pid, &raw);
+    xml_node_fetch(pid, &raw);
     assert(raw != NULL);
 
     *rid = raw->parent;
@@ -58,14 +58,14 @@ void xml_node_add_node(id pid, id cid)
 {
     struct xml_node *rp, *rc, *ocp;
 
-    fetch(cid, &rc);
+    xml_node_fetch(cid, &rc);
     assert(rc != NULL);
     if (id_equal(rc->parent, pid)) return;
-    fetch(pid, &rp);
+    xml_node_fetch(pid, &rp);
     assert(rp != NULL);
 
     retain(cid);
-    fetch(rc->parent, &ocp);
+    xml_node_fetch(rc->parent, &ocp);
     if (ocp) {        
         vector_remove_id(ocp->children, cid);
     }
@@ -81,16 +81,16 @@ void xml_node_add_attribute(id pid, id aid)
     const char *ptr;
     unsigned len;
 
-    fetch(aid, &rc);
+    xml_attribute_fetch(aid, &rc);
     assert(rc != NULL);
     if (id_equal(rc->node, pid)) return;
-    fetch(pid, &rp);
+    xml_node_fetch(pid, &rp);
     assert(rp != NULL);
 
     retain(aid);
     buffer_get_ptr(rc->name, &ptr);
     buffer_get_length(rc->name, &len);
-    fetch(rc->node, &ocp);
+    xml_node_fetch(rc->node, &ocp);
     if (ocp) {        
         map_remove(ocp->attributes, key_mem(ptr, len));
     }
@@ -104,7 +104,7 @@ void xml_node_get_attribute_by_index(id pid, unsigned index, id *aid)
     struct xml_node *r;
     key k;
 
-    fetch(pid, &r);
+    xml_node_fetch(pid, &r);
     assert(r != NULL);
     map_iterate(r->attributes, index, &k, aid);
 }
@@ -113,7 +113,7 @@ void xml_node_get_attribute_by_name(id pid, const char *name, id *aid)
 {
     struct xml_node *r;
 
-    fetch(pid, &r);
+    xml_node_fetch(pid, &r);
     assert(r != NULL);
     map_get(r->attributes, key_chars(name), aid);
 }
@@ -122,9 +122,9 @@ static void __xml_node_set_name(id pid, const char *name, const unsigned name_le
 {
     struct xml_node *r;
 
-    fetch(pid, &r);
+    xml_node_fetch(pid, &r);
     assert(r != NULL);
-    buffer_clear(r->name);
+    buffer_erase(r->name);
     buffer_append(r->name, name, name_len);
 }
 
@@ -137,9 +137,9 @@ static void __xml_node_set_value(id pid, const char *value, const unsigned value
 {
     struct xml_node *r;
 
-    fetch(pid, &r);
+    xml_node_fetch(pid, &r);
     assert(r != NULL);
-    buffer_clear(r->value);
+    buffer_erase(r->value);
     buffer_append(r->value, value, value_len);
 }
 
@@ -152,7 +152,7 @@ void xml_node_get_name(id pid, const char * const *ptr, unsigned *len)
 {
     struct xml_node *r;
 
-    fetch(pid, &r);
+    xml_node_fetch(pid, &r);
     assert(r != NULL);
     buffer_get_ptr(r->name, ptr);
     buffer_get_length(r->name, len);
@@ -162,7 +162,7 @@ void xml_node_get_value(id pid, const char * const *ptr, unsigned *len)
 {
     struct xml_node *r;
 
-    fetch(pid, &r);
+    xml_node_fetch(pid, &r);
     assert(r != NULL);
     buffer_get_ptr(r->value, ptr);
     buffer_get_length(r->value, len);
@@ -191,7 +191,7 @@ void __xml_attribute_set_name(id pid, const char *name, const unsigned name_len)
     const char *ptr;
     unsigned len;
 
-    fetch(pid, &r);
+    xml_attribute_fetch(pid, &r);
     assert(r != NULL);
 
     buffer_get_ptr(r->name, &ptr);
@@ -199,12 +199,12 @@ void __xml_attribute_set_name(id pid, const char *name, const unsigned name_len)
     if (len == name_len && strncmp(ptr, name, name_len) == 0) return;
 
     retain(pid);
-    fetch(r->node, &rp);
+    xml_node_fetch(r->node, &rp);
     if (rp) {
         map_remove(rp->attributes, key_mem(ptr, len));
         map_set(rp->attributes, key_mem(name, name_len), pid);
     }
-    buffer_clear(r->name);
+    buffer_erase(r->name);
     buffer_append(r->name, name, name_len);
     release(pid);
 }
@@ -218,9 +218,9 @@ void __xml_attribute_set_value(id pid, const char *value, const unsigned value_l
 {
     struct xml_attribute *r;
 
-    fetch(pid, &r);
+    xml_attribute_fetch(pid, &r);
     assert(r != NULL);
-    buffer_clear(r->value);
+    buffer_erase(r->value);
     buffer_append(r->value, value, value_len);
 }
 
@@ -233,7 +233,7 @@ void xml_attribute_get_name(id pid, const char * const *ptr, unsigned *len)
 {
     struct xml_attribute *r;
 
-    fetch(pid, &r);
+    xml_attribute_fetch(pid, &r);
     assert(r != NULL);
     buffer_get_ptr(r->name, ptr);
     buffer_get_length(r->name, len);
@@ -243,7 +243,7 @@ void xml_attribute_get_value(id pid, const char * const *ptr, unsigned *len)
 {
     struct xml_attribute *r;
 
-    fetch(pid, &r);
+    xml_attribute_fetch(pid, &r);
     assert(r != NULL);
     buffer_get_ptr(r->value, ptr);
     buffer_get_length(r->value, len);
@@ -672,7 +672,7 @@ void xml_node_load_file(id pid, const char *path)
     const char *ptr;
     unsigned len;
 
-    fetch(pid, &raw);
+    xml_node_fetch(pid, &raw);
     assert(raw != NULL);
     retain(pid);
 
@@ -680,23 +680,23 @@ void xml_node_load_file(id pid, const char *path)
     index = 0;
     vector_get(raw->children, index, &obj);
     while (id_validate(obj)) {
-        fetch(obj, &c);
+        xml_node_fetch(obj, &c);
         c->parent = id_null;
         index++;
         vector_get(raw->children, index, &obj);
     }
-    vector_clear(raw->children);
+    vector_remove_all(raw->children);
     
     /* clear attributes */
     index = 0;
     map_iterate(raw->attributes, index, &k, &obj);
     while (id_validate(obj)) {
-        fetch(obj, &a);
+        xml_attribute_fetch(obj, &a);
         a->node = id_null;
         index++;
         map_iterate(raw->attributes, index, &k, &obj);
     }
-    map_clear(raw->attributes);
+    map_remove_all(raw->attributes);
 
     /* load file */
     buffer_new(&buf);
@@ -717,7 +717,7 @@ struct xml_query
     id vnodes;
     id vattrs;
 };
-make_type_detail(xml_query);
+make_type(xml_query);
 
 static void xml_query_init(struct xml_query *p, key k)
 {
@@ -735,7 +735,7 @@ void xml_query_get_node(id pid, unsigned index, id *nid)
 {
     struct xml_query *raw;
 
-    fetch(pid, &raw);
+    xml_query_fetch(pid, &raw);
     assert(raw != NULL);
     vector_get(raw->vnodes, index, nid);
 }
@@ -744,7 +744,7 @@ void xml_query_get_node_length(id pid, unsigned *len)
 {
     struct xml_query *raw;
 
-    fetch(pid, &raw);
+    xml_query_fetch(pid, &raw);
     assert(raw != NULL);
     vector_get_size(raw->vnodes, len);
 }
@@ -753,7 +753,7 @@ void xml_query_get_attribute(id pid, unsigned index, id *aid)
 {
     struct xml_query *raw;
 
-    fetch(pid, &raw);
+    xml_query_fetch(pid, &raw);
     assert(raw != NULL);
     vector_get(raw->vattrs, index, aid);
 }
@@ -762,7 +762,7 @@ void xml_query_get_attribute_length(id pid, unsigned *len)
 {
     struct xml_query *raw;
 
-    fetch(pid, &raw);
+    xml_query_fetch(pid, &raw);
     assert(raw != NULL);
     vector_get_size(raw->vattrs, len);
 }
@@ -936,7 +936,7 @@ static void __fetch_attribute_name(struct xml_query *raw, const char *name, cons
     unsigned ptr_len;
 
     map_new(&set);
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
 
     i = 0;
     vector_get(raw->vnodes, i, &n);
@@ -959,7 +959,7 @@ static void __fetch_attribute_name(struct xml_query *raw, const char *name, cons
         vector_get(raw->vnodes, i, &n);
     }
 
-    vector_clear(raw->vnodes);
+    vector_remove_all(raw->vnodes);
     release(set);
 }
 
@@ -969,7 +969,7 @@ static void __fetch_all_attribute(struct xml_query *raw)
 	int i, j;
 
     map_new(&set);
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
 
     i = 0;
     vector_get(raw->vnodes, i, &n);
@@ -989,7 +989,7 @@ static void __fetch_all_attribute(struct xml_query *raw)
         vector_get(raw->vnodes, i, &n);
     }
 
-    vector_clear(raw->vnodes);
+    vector_remove_all(raw->vnodes);
     release(set);
 }
 
@@ -998,7 +998,7 @@ static void __keep_node_has_at_least_one_attribute(struct xml_query *raw)
     id n, a;
 	int i;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
 
     i = 0;
     vector_get(raw->vnodes, i, &n);
@@ -1021,7 +1021,7 @@ static void __keep_node_has_at_least_one_attribute_with_value(
     const char *ptr;
     unsigned ptr_len;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
 
     i = 0;
     vector_get(raw->vnodes, i, &n);
@@ -1051,7 +1051,7 @@ static void __keep_node_has_attribute(struct xml_query *raw, const char *name, c
     const char *ptr;
     unsigned ptr_len;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
 
     i = 0;
     vector_get(raw->vnodes, i, &n);
@@ -1083,7 +1083,7 @@ static void __keep_node_has_attribute_with_value(struct xml_query *raw,
     const char *ptr;
     unsigned ptr_len;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
 
     i = 0;
     vector_get(raw->vnodes, i, &n);
@@ -1114,7 +1114,7 @@ static void __move_to_parent(struct xml_query *raw)
     id set, n, p, t;
 	int i;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
     map_new(&set);
 
     i = 0;
@@ -1148,14 +1148,14 @@ static void __get_all_children_has_name(struct xml_query *raw, const char *name,
     unsigned ptr_len;
     struct xml_node *rn;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
     map_new(&set);
     vector_new(&v);
 
     i = 0;
     vector_get(raw->vnodes, i, &n);
     while (id_validate(n)) {
-        fetch(n, &rn);        
+        xml_node_fetch(n, &rn);        
         j = 0;
         vector_get(rn->children, j, &c);
         while(id_validate(c)) {
@@ -1174,7 +1174,7 @@ static void __get_all_children_has_name(struct xml_query *raw, const char *name,
         vector_get(raw->vnodes, i, &n);
     }
 
-    vector_clear(raw->vnodes);
+    vector_remove_all(raw->vnodes);
     vector_push_vector(raw->vnodes, v);
     release(set);
     release(v);
@@ -1186,14 +1186,14 @@ static void __get_all_children(struct xml_query *raw)
 	int i, j;
     struct xml_node *rn;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
     map_new(&set);
     vector_new(&v);
 
     i = 0;
     vector_get(raw->vnodes, i, &n);
     while (id_validate(n)) {
-        fetch(n, &rn);
+        xml_node_fetch(n, &rn);
         j = 0;
         vector_get(rn->children, j, &c);
         while(id_validate(c)) {
@@ -1209,7 +1209,7 @@ static void __get_all_children(struct xml_query *raw)
         vector_get(raw->vnodes, i, &n);
     }
 
-    vector_clear(raw->vnodes);
+    vector_remove_all(raw->vnodes);
     vector_push_vector(raw->vnodes, v);
     release(set);
     release(v);
@@ -1223,7 +1223,7 @@ static void __get_all_children_has_name_recursive(struct xml_query *raw, const c
     const char *ptr;
     unsigned ptr_len;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
     map_new(&set);
     map_new(&check);
     vector_new(&v);
@@ -1242,7 +1242,7 @@ static void __get_all_children_has_name_recursive(struct xml_query *raw, const c
     i = 0;
     vector_get(raw->vnodes, i, &n);
     while (id_validate(n)) {
-        fetch(n, &rn);
+        xml_node_fetch(n, &rn);
         j = 0;
         vector_get(rn->children, j, &c);
         while(id_validate(c)) {
@@ -1266,7 +1266,7 @@ static void __get_all_children_has_name_recursive(struct xml_query *raw, const c
         vector_get(raw->vnodes, i, &n);
     }
 
-    vector_clear(raw->vnodes);
+    vector_remove_all(raw->vnodes);
     vector_push_vector(raw->vnodes, v);
     release(set);
     release(check);
@@ -1279,7 +1279,7 @@ static void __get_all_children_recursive(struct xml_query *raw)
 	int i, j;
     struct xml_node *rn;
 
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vattrs);
     map_new(&set);
     map_new(&check);
     vector_new(&v);
@@ -1298,7 +1298,7 @@ static void __get_all_children_recursive(struct xml_query *raw)
     i = 0;
     vector_get(raw->vnodes, i, &n);
     while (id_validate(n)) {
-        fetch(n, &rn);
+        xml_node_fetch(n, &rn);
         j = 0;
         vector_get(rn->children, j, &c);
         while(id_validate(c)) {
@@ -1319,7 +1319,7 @@ static void __get_all_children_recursive(struct xml_query *raw)
         vector_get(raw->vnodes, i, &n);
     }
 
-    vector_clear(raw->vnodes);
+    vector_remove_all(raw->vnodes);
     vector_push_vector(raw->vnodes, v);
     release(set);
     release(check);
@@ -1336,10 +1336,10 @@ void xml_query_search(id pid, id nid, const char *command)
     unsigned len;
     id n;
 
-    fetch(pid, &raw);
+    xml_query_fetch(pid, &raw);
     assert(raw != NULL);
-    vector_clear(raw->vnodes);
-    vector_clear(raw->vattrs);
+    vector_remove_all(raw->vnodes);
+    vector_remove_all(raw->vattrs);
 	ptr = command;
 	recursive = 0;
     vector_push(raw->vnodes, nid);
@@ -1358,7 +1358,7 @@ block:
                 if (len == 1) {
                     vector_get(raw->vnodes, 0, &n);
                     if (id_equal(n, nid)) {
-                        vector_clear(raw->vnodes);
+                        vector_remove_all(raw->vnodes);
                     }
                 }
 				goto finish;
@@ -1384,8 +1384,8 @@ block:
 					ptr = end;
 					goto block;
 				case '@':
-                    vector_clear(raw->vnodes);
-                    vector_clear(raw->vattrs);
+                    vector_remove_all(raw->vnodes);
+                    vector_remove_all(raw->vattrs);
 					goto finish;
 				default:
 					goto detail_case;

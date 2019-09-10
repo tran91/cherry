@@ -286,6 +286,12 @@ static signed type = -1;
 static struct map *cache = NULL;
 static volatile unsigned barrier = 0;
 
+static void map_fetch(id pid, struct map **ptr)
+{
+    void fetch(id pid, unsigned type, void *p);
+    fetch(pid, (unsigned)type, ptr);
+}
+
 static void clean()
 {
     clear(cache);
@@ -334,7 +340,7 @@ void map_get_size(id map, unsigned *size)
 {
     struct map *raw;
     
-    fetch(map, &raw);
+    map_fetch(map, &raw);
     assert(raw != NULL);
     *size = raw->count;
 }
@@ -343,7 +349,7 @@ void map_set(id map, key k, id object)
 {
     struct map *raw;
     
-    fetch(map, &raw);
+    map_fetch(map, &raw);
     assert(raw != NULL);
     set(raw, k, object);
 }
@@ -353,7 +359,7 @@ void map_get(id map, key k, id *object)
     struct map *raw;
     struct cell *c;
     
-    fetch(map, &raw);
+    map_fetch(map, &raw);
     assert(raw != NULL);
     get(raw, k, &c);
     if (c) {
@@ -367,7 +373,7 @@ void map_remove(id map, key k)
 {
     struct map *raw;
     
-    fetch(map, &raw);
+    map_fetch(map, &raw);
     assert(raw != NULL);
     __remove(raw, k);
 }
@@ -376,7 +382,7 @@ void map_iterate(id map, unsigned index, key *k, id *object)
 {
     struct map *raw;
 
-    fetch(map, &raw);
+    map_fetch(map, &raw);
     assert(raw != NULL);
 
     if (index >= raw->count) {
@@ -388,11 +394,11 @@ void map_iterate(id map, unsigned index, key *k, id *object)
     }
 }
 
-void map_clear(id map)
+void map_remove_all(id map)
 {
     struct map *raw;
     
-    fetch(map, &raw);
+    map_fetch(map, &raw);
     assert(raw != NULL);
     clear(raw);
 }

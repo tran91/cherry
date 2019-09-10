@@ -6,13 +6,13 @@ struct bind {
 };
 make_type(bind);
 
-static void init(struct bind *p, key k)
+static void bind_init(struct bind *p, key k)
 {
     p->ptr = NULL;
     p->del = NULL;
 }
 
-static void clear(struct bind *p)
+static void bind_clear(struct bind *p)
 {
     void *ptr;
     void(*del)(void *);
@@ -32,10 +32,10 @@ void bind_set(id pid, unsigned size, void(*pinit)(void*), void(*pclear)(void*))
 {
     struct bind *raw;
 
-    fetch(pid, &raw);
+    bind_fetch(pid, &raw);
     assert(raw != NULL);
 
-    clear(raw);
+    bind_clear(raw);
     raw->ptr = malloc(size);
     raw->del = pclear;
     if (pinit) {
@@ -47,10 +47,10 @@ void bind_set_raw(id pid, void *copy, unsigned size)
 {
     struct bind *raw;
 
-    fetch(pid, &raw);
+    bind_fetch(pid, &raw);
     assert(raw != NULL);
 
-    clear(raw);
+    bind_clear(raw);
     raw->ptr = malloc(size);
     memcpy(raw->ptr, copy, size);
 }
@@ -60,7 +60,7 @@ void bind_get(id pid, void *d)
     void **ptr = d;
     struct bind *raw;
 
-    fetch(pid, &raw);
+    bind_fetch(pid, &raw);
     assert(raw != NULL);
 
     *ptr = raw->ptr;

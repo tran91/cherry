@@ -24,7 +24,7 @@ struct mat4
 };
 make_type(mat4);
 
-static void init(struct mat4 *p, key k)
+static void mat4_init(struct mat4 *p, key k)
 {
     __set_scalar(16, p->m, 0);
     p->m00 = 1;
@@ -33,7 +33,7 @@ static void init(struct mat4 *p, key k)
     p->m33 = 1;
 }
 
-static void clear(struct mat4 *p)
+static void mat4_clear(struct mat4 *p)
 {
 
 }
@@ -42,7 +42,7 @@ void mat4_set_identity(id pid)
 {
     struct mat4 *raw;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
     __set_scalar(16, raw->m, 0);
     raw->m00 = 1;
@@ -55,7 +55,7 @@ void mat4_set_array(id pid, float f[16])
 {
     struct mat4 *raw;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
     memcpy(raw->m, f, sizeof(float[16]));
 }
@@ -64,7 +64,7 @@ void mat4_inverse(id pid)
 {
     struct mat4 *raw;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
     struct mat4 mb = *raw;
     float s0 = mb.m00 * mb.m11 - mb.m10 * mb.m01;
@@ -112,7 +112,7 @@ void mat4_transpose(id pid)
 {
     struct mat4 *raw, tmp;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
     tmp = *raw;
 
@@ -142,7 +142,7 @@ void mat4_set_perspective(id pid, float fov, float aspect, float near, float far
     struct mat4 *raw;
     float cotan;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
 
     cotan = 1.0f / tanf(fov / 2.0f);
@@ -171,7 +171,7 @@ void mat4_set_orthographic(id pid, float left, float right, float bottom, float 
 {
     struct mat4 *raw;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
     float ral = right + left;
     float rsl = right - left;
@@ -205,7 +205,7 @@ void mat4_set_look_at(id pid, float eye_x, float eye_y, float eye_z, float targe
     id n, u, v;
     struct mat4 *raw;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
 
     vec3_new(&n);
@@ -264,8 +264,8 @@ void mat4_mul_mat4(id pid, id cid)
 {
     struct mat4 *r1, *r2, tmp;
 
-    fetch(pid, &r1);
-    fetch(pid, &r2);
+    mat4_fetch(pid, &r1);
+    mat4_fetch(pid, &r2);
     assert(r1 != NULL && r2 != NULL);
 
     tmp = *r1;
@@ -296,7 +296,7 @@ void mat4_mul_project_vec3(id pid, id cid)
     struct mat4 *raw;
     float x, y, z, w, x2, y2, z2, w2;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
 
     vec3_get(cid, &x, &y, &z);
@@ -338,7 +338,7 @@ void mat4_translate(id pid, float x, float y, float z)
 {
     struct mat4 *raw;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
     raw->m[12] += raw->m[0] * x + raw->m[4] * y + raw->m[8] * z;
     raw->m[13] += raw->m[1] * x + raw->m[5] * y + raw->m[9] * z;
@@ -350,7 +350,7 @@ void mat4_scale(id pid, float x, float y, float z)
     struct mat4 *raw;
     int i;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
     for (i = 0; i < 4; ++i) {
         raw->mm[0][i] *= x;
@@ -364,7 +364,7 @@ void mat4_rotate(id pid, float x, float y, float z, float radian)
     struct mat4 *raw;
     float length;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
     length = sqrtf(x * x + y * y + z * z);
     x /= length;
@@ -415,7 +415,7 @@ void mat4_get(id pid, float m[16])
 {
     struct mat4 *raw;
 
-    fetch(pid, &raw);
+    mat4_fetch(pid, &raw);
     assert(raw != NULL);
 
     memcpy(m, raw->m, sizeof(float[16]));

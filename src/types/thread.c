@@ -16,7 +16,7 @@ make_type(thread);
 
 static void *run(id *pid);
 
-static void init(struct thread *p, key k)
+static void thread_init(struct thread *p, key k)
 {
     vector_new(&p->jobs);
     pthread_mutex_init(&p->barrier, NULL);
@@ -24,7 +24,7 @@ static void init(struct thread *p, key k)
     p->running = 0;
 }
 
-static void clear(struct thread *p)
+static void thread_clear(struct thread *p)
 {
     pthread_mutex_lock(&p->barrier);
     release(p->jobs);
@@ -42,7 +42,7 @@ static void *run(id *pid)
 
 check:
     retain(*pid);
-    fetch(*pid, &raw);
+    thread_fetch(*pid, &raw);
     if (!raw) goto finish;
 
     pthread_mutex_lock(&raw->barrier);
@@ -61,7 +61,7 @@ check:
         pthread_mutex_unlock(&raw->barrier);
         release(*pid);
 
-        fetch(*pid, &raw);
+        thread_fetch(*pid, &raw);
         if (raw) {
             pthread_mutex_lock(&raw->barrier);
             pthread_cond_wait(&raw->cond, &raw->barrier);
@@ -69,7 +69,7 @@ check:
         } 
 
         retain(*pid);
-        fetch(*pid, &raw);
+        thread_fetch(*pid, &raw);
         if (!raw) goto finish;
         release(*pid);
         
@@ -112,7 +112,7 @@ void thread_add_job(id pid, id cid)
     struct thread *raw;
     id *ext;
 
-    fetch(pid, &raw);
+    thread_fetch(pid, &raw);
     assert(raw != NULL);
 
     pthread_mutex_lock(&raw->barrier);
@@ -122,16 +122,16 @@ void thread_add_job(id pid, id cid)
         ext = malloc(sizeof(id));
         *ext = pid;
         pthread_create(&tid, NULL, (void*(*)(void*))run, (void*)ext);
-        lock(&barrier);
+        lock(&thread_barrier);
         tids.start = realloc(tids.start, sizeof(pthread_t) * (tids.len + 1));
         tids.start[tids.len] = tid;
         tids.len++;
         if (!do_wait) {
             do_wait = 1;
-            unlock(&barrier);
+            unlock(&thread_barrier);
             atexit(wait);
         } else {
-            unlock(&barrier);
+            unlock(&thread_barrier);
         }
     }
     pthread_mutex_unlock(&raw->barrier);

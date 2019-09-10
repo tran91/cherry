@@ -27,7 +27,7 @@ static void load_file(struct buffer *p, const char *path)
     release(fid);
 }
 
-static void init(struct buffer *p, key k)
+static void buffer_init(struct buffer *p, key k)
 {
     p->ptr = NULL;
     p->len = 0;
@@ -40,7 +40,7 @@ static void init(struct buffer *p, key k)
     }
 }
 
-static void clear(struct buffer *p)
+static void buffer_clear(struct buffer *p)
 {
     if (p->ptr) {
         free(p->ptr);
@@ -49,11 +49,11 @@ static void clear(struct buffer *p)
     }
 }
 
-void buffer_clear(id pid)
+void buffer_erase(id pid)
 {
     struct buffer *raw;
 
-    fetch(pid, &raw);
+    buffer_fetch(pid, &raw);
     assert(raw != NULL);
     raw->len = 0;
 }
@@ -62,7 +62,7 @@ void buffer_append_file(id pid, const char *path)
 {
     struct buffer *raw;
 
-    fetch(pid, &raw);
+    buffer_fetch(pid, &raw);
     assert(raw != NULL);
 
     load_file(raw, path);
@@ -74,7 +74,7 @@ void buffer_append(id pid, const void *buf, const unsigned len)
 
     if (len == 0 || !buf) return;
 
-    fetch(pid, &raw);
+    buffer_fetch(pid, &raw);
     assert(raw != NULL);
     raw->ptr = realloc(raw->ptr, raw->len + len + 1);
     memcpy(raw->ptr + raw->len, buf, len);
@@ -86,7 +86,7 @@ void buffer_append_buffer(id pid, id cid)
 {
     struct buffer *r2;
 
-    fetch(pid, &r2);
+    buffer_fetch(pid, &r2);
     assert(r2 != NULL);
     buffer_append(pid, r2->ptr, r2->len);
 }
@@ -95,7 +95,7 @@ void buffer_get_length(id pid, unsigned *len)
 {
     struct buffer *raw;
 
-    fetch(pid, &raw);
+    buffer_fetch(pid, &raw);
     assert(raw != NULL);
     *len = raw->len;
 }
@@ -106,7 +106,7 @@ void buffer_replace(id pid, const void *search, const unsigned slen, const void 
     const char *s, *r;
     int i, j, c;
 
-    fetch(pid, &raw);
+    buffer_fetch(pid, &raw);
     assert(raw != NULL && search != NULL && replace != NULL);
 
     if (!raw->ptr || slen == 0) return;
@@ -149,7 +149,7 @@ void buffer_get_ptr(id pid, const void *ptr)
 {
     struct buffer *raw;
 
-    fetch(pid, &raw);
+    buffer_fetch(pid, &raw);
     assert(raw != NULL);
     *(void **)ptr = raw->ptr;
 }

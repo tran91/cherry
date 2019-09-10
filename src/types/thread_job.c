@@ -8,13 +8,13 @@ struct thread_job
 };
 make_type(thread_job);
 
-static void init(struct thread_job *p, key k)
+static void thread_job_init(struct thread_job *p, key k)
 {
     vector_new(&p->data);
     p->callback = NULL;
 }
 
-static void clear(struct thread_job *p)
+static void thread_job_clear(struct thread_job *p)
 {
     release(p->data);
 }
@@ -23,7 +23,7 @@ void thread_job_set_callback(id pid, thread_job_callback f)
 {
     struct thread_job *raw;
 
-    fetch(pid, &raw);
+    thread_job_fetch(pid, &raw);
     assert(raw != NULL);
     raw->callback = f;
 }
@@ -32,7 +32,7 @@ void thread_job_add_arguments(id pid, id cid)
 {
     struct thread_job *raw;
 
-    fetch(pid, &raw);
+    thread_job_fetch(pid, &raw);
     assert(raw != NULL);
     vector_push(raw->data, cid);
 }
@@ -44,7 +44,7 @@ void thread_job_run(id pid)
     signed i;
     id arg[8];
 
-    fetch(pid, &raw);
+    thread_job_fetch(pid, &raw);
     assert(raw != NULL);
     if (!raw->callback) goto finish;
 

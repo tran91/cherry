@@ -9,12 +9,12 @@ struct http_client {
 };
 make_type(http_client);
 
-static void init(struct http_client *p, key k)
+static void http_client_init(struct http_client *p, key k)
 {
     thread_new(&p->tid);
 }
 
-static void clear(struct http_client *p)
+static void http_client_clear(struct http_client *p)
 {
     release(p->tid);
 }
@@ -139,7 +139,7 @@ void http_client_get(id pid, const char *link, id cid, http_client_callback cb)
     struct http_client *raw;
     id job, buf, bnd;
 
-    fetch(pid, &raw);
+    http_client_fetch(pid, &raw);
     assert(raw != NULL);
 
     buffer_new(&buf);

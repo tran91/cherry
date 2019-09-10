@@ -98,7 +98,7 @@ struct vga_attribute
     char created;
     unsigned target;
 };
-make_type_detail(vga_attribute);
+make_type(vga_attribute);
 
 static void vga_attribute_init(struct vga_attribute *p, key k)
 {
@@ -120,7 +120,7 @@ void vga_attribute_fill(id pid, const void *buf, const unsigned size, const unsi
 {
     struct vga_attribute *raw;
 
-    fetch(pid, &raw);
+    vga_attribute_fetch(pid, &raw);
     assert(raw != NULL);
 
     glBindBuffer(raw->target, raw->glid);
@@ -132,7 +132,7 @@ void vga_attribute_replace(id pid, const unsigned offset, const void *buf, const
 {
     struct vga_attribute *raw;
 
-    fetch(pid, &raw);
+    vga_attribute_fetch(pid, &raw);
     assert(raw != NULL);
 
     glBindBuffer(raw->target, raw->glid);
@@ -149,7 +149,7 @@ struct vga_attribute_group
     char created;
     id map;
 };
-make_type_detail(vga_attribute_group);
+make_type(vga_attribute_group);
 
 static void vga_attribute_group_init(struct vga_attribute_group *p, key k)
 {
@@ -173,8 +173,8 @@ void vga_attribute_group_add(id pid, id attr, const char *name, signed data_type
     struct vga_attribute *a_raw;
     unsigned index;
 
-    fetch(pid, &raw);
-    fetch(attr, &a_raw);
+    vga_attribute_group_fetch(pid, &raw);
+    vga_attribute_fetch(attr, &a_raw);
     assert(raw != NULL);
 
     map_get_size(raw->map, &index);
@@ -198,7 +198,7 @@ struct vga_texture
     unsigned height;
     char created;
 };
-make_type_detail(vga_texture);
+make_type(vga_texture);
 
 static void vga_texture_init(struct vga_texture *p, key k)
 {
@@ -223,7 +223,7 @@ void vga_texture_get_width(id pid, unsigned *width)
 {
     struct vga_texture *raw;
 
-    fetch(pid, &raw);
+    vga_texture_fetch(pid, &raw);
     assert(raw != NULL);
 
     *width = raw->width;
@@ -233,7 +233,7 @@ void vga_texture_get_height(id pid, unsigned *height)
 {
     struct vga_texture *raw;
 
-    fetch(pid, &raw);
+    vga_texture_fetch(pid, &raw);
     assert(raw != NULL);
 
     *height = raw->height;
@@ -246,7 +246,7 @@ void vga_texture_load_file(id pid, const char *path)
     unsigned channels;
     const unsigned char *ptr;
 
-    fetch(pid, &raw);
+    vga_texture_fetch(pid, &raw);
     assert(raw != NULL);
 
     image_new(&img);
@@ -280,7 +280,7 @@ void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned inte
 {
     struct vga_texture *raw;
 
-    fetch(pid, &raw);
+    vga_texture_fetch(pid, &raw);
     assert(raw != NULL);
 
     raw->width = width;
@@ -312,7 +312,7 @@ struct vga_renderbuffer
     unsigned height;
     char created;
 };
-make_type_detail(vga_renderbuffer);
+make_type(vga_renderbuffer);
 
 static void vga_renderbuffer_init(struct vga_renderbuffer *p, key k)
 {
@@ -363,7 +363,7 @@ struct vga_framebuffer
     char has_stencil;
     char depth_stencil_complete;
 };
-make_type_detail(vga_framebuffer);
+make_type(vga_framebuffer);
 
 static void vga_framebuffer_init(struct vga_framebuffer *p, key k)
 {
@@ -442,8 +442,8 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
                 glDeleteFramebuffers(1, &p->sampler.glid);
                 p->sampler.created = 0;
             }
-            map_clear(p->sampler.mrens);
-            vector_clear(p->sampler.vrens);
+            map_remove_all(p->sampler.mrens);
+            vector_remove_all(p->sampler.vrens);
             p->sampler.samples = 0;
         } else {
             if (p->sampler.created == 0) {
@@ -463,7 +463,7 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
         buffer_get_ptr(name, &ptr);
         map_get(p->resolver.mtexs, key_chars(ptr), &tex);
         if (id_validate(tex)) {
-            fetch(tex, &vtx);
+            vga_texture_fetch(tex, &vtx);
             if (vtx->width != p->width || vtx->height != p->height) {
                 vga_texture_load_raw(tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);                
             }
@@ -474,7 +474,7 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
             vector_push(p->resolver.vtexs, tex);
             release(tex);
 
-            fetch(tex, &vtx);
+            vga_texture_fetch(tex, &vtx);
             vector_get_size(p->resolver.vtexs, &len);
             glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
             glBindTexture(GL_TEXTURE_2D, vtx->glid);
@@ -505,7 +505,7 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
             buffer_get_ptr(name, &ptr);
             map_get(p->sampler.mrens, key_chars(ptr), &ren);
             if (id_validate(ren)) {
-                fetch(ren, &vrb);
+                vga_renderbuffer_fetch(ren, &vrb);
                 if (vrb->width != p->width || vrb->height != p->height) {                    
                     vrb->width = p->width;
                     vrb->height = p->height;
@@ -515,7 +515,7 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
                 }
             } else {
                 vga_renderbuffer_new(&ren);
-                fetch(ren, &vrb);
+                vga_renderbuffer_fetch(ren, &vrb);
                 vrb->width = p->width;
                 vrb->height = p->height;
                 glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
@@ -549,10 +549,10 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
     /* build depth */
     if (p->depth_stencil_complete) return;
     if (p->has_depth || p->has_stencil) {
-        fetch(p->depth_stencil, &vrb);
+        vga_renderbuffer_fetch(p->depth_stencil, &vrb);
         if (!vrb) {
             vga_renderbuffer_new(&p->depth_stencil);
-            fetch(p->depth_stencil, &vrb);
+            vga_renderbuffer_fetch(p->depth_stencil, &vrb);
         }
         if (p->sampler.created == 1) {
             /* detach resolver depth buffer */
@@ -623,7 +623,7 @@ void vga_framebuffer_set_size(id pid, unsigned width, unsigned height)
 {
     struct vga_framebuffer *raw;
 
-    fetch(pid, &raw);
+    vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL && width > 0 && height > 0 && raw->resolver.created != 2);
 
     if (raw->width == width && raw->height == height) return;
@@ -638,7 +638,7 @@ void vga_framebuffer_set_depth(id pid, char depth, char stencil)
 {
     struct vga_framebuffer *raw;
 
-    fetch(pid, &raw);
+    vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
     if (raw->has_depth == depth && raw->has_depth == stencil) return;
@@ -653,7 +653,7 @@ void vga_framebuffer_set_multisampling(id pid, unsigned char samples)
 {
     struct vga_framebuffer *raw;
 
-    fetch(pid, &raw);
+    vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
     raw->sampler.build_samples = samples;
@@ -665,7 +665,7 @@ void vga_framebuffer_add_texture(id pid, const char *name)
     struct vga_framebuffer *raw;
     id tmp;
 
-    fetch(pid, &raw);
+    vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
     map_get(raw->resolver.mtexs, key_chars(name), &tmp);
@@ -683,7 +683,7 @@ void vga_framebuffer_get_texture(id pid, const char *name, id *tex)
 {
     struct vga_framebuffer *raw;
 
-    fetch(pid, &raw);
+    vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
     map_get(raw->resolver.mtexs, key_chars(name), tex);
@@ -693,7 +693,7 @@ void vga_framebuffer_begin(id pid)
 {
     struct vga_framebuffer *raw;
 
-    fetch(pid, &raw);
+    vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (raw->resolver.created == 0) return;
@@ -718,7 +718,7 @@ void vga_framebuffer_end(id pid)
     int i;
     unsigned draw[32] = {GL_NONE};
 
-    fetch(pid, &raw);
+    vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (raw->resolver.created == 0) return;
@@ -755,7 +755,7 @@ struct vga_screen
     unsigned width;
     unsigned height;
 };
-make_type_detail(vga_screen);
+make_type(vga_screen);
 
 static void vga_screen_init(struct vga_screen *p, key k)
 {
@@ -773,7 +773,7 @@ void vga_screen_set_size(id pid, unsigned width, unsigned height)
 {
     struct vga_screen *raw;
 
-    fetch(pid, &raw);
+    vga_screen_fetch(pid, &raw);
     assert(raw != NULL);
 
     raw->width = width;
@@ -784,7 +784,7 @@ void vga_screen_get_size(id pid, unsigned *width, unsigned *height)
 {
     struct vga_screen *raw;
 
-    fetch(pid, &raw);
+    vga_screen_fetch(pid, &raw);
     assert(raw != NULL);
 
     *width = raw->width;
@@ -795,7 +795,7 @@ void vga_screen_set_glid(id pid, unsigned glid)
 {
     struct vga_screen *raw;
 
-    fetch(pid, &raw);
+    vga_screen_fetch(pid, &raw);
     assert(raw != NULL);
 
     raw->glid = glid;
@@ -805,7 +805,7 @@ static void vga_screen_get_glid(id pid, unsigned *glid)
 {
     struct vga_screen *raw;
 
-    fetch(pid, &raw);
+    vga_screen_fetch(pid, &raw);
     assert(raw != NULL);
 
     *glid = raw->glid;
@@ -821,7 +821,7 @@ struct vga_screenbuffer
     unsigned height;
     id scr;
 };
-make_type_detail(vga_screenbuffer);
+make_type(vga_screenbuffer);
 
 static void vga_screenbuffer_init(struct vga_screenbuffer *p, key k)
 {
@@ -838,7 +838,7 @@ void vga_screenbuffer_begin(id pid)
 {
     struct vga_screenbuffer *raw;
 
-    fetch(pid, &raw);
+    vga_screenbuffer_fetch(pid, &raw);
     assert(raw != NULL);
 
     glBindFramebuffer(GL_FRAMEBUFFER, raw->glid);
@@ -856,7 +856,7 @@ void vga_screenbuffer_set_screen(id pid, id sid)
 {
     struct vga_screenbuffer *raw;
 
-    fetch(pid, &raw);
+    vga_screenbuffer_fetch(pid, &raw);
     assert(raw != NULL);
 
     retain(sid);
@@ -883,7 +883,7 @@ struct vga_program
     cull_opt cull;
     id mtexs;
 };
-make_type_detail(vga_program);
+make_type(vga_program);
 
 static void vga_program_init(struct vga_program *p, key k)
 {
@@ -934,7 +934,7 @@ void vga_program_load(id pid, const char *vert_path, const char *frag_path)
     signed r;
     char info[512];
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
     vga_program_clear(raw);
     map_new(&raw->mtexs);
@@ -998,7 +998,7 @@ static void begin(id pid)
     struct vga_program *raw;
 
     if (!id_equal(pid, current_program)) {
-        fetch(pid, &raw);
+        vga_program_fetch(pid, &raw);
         assert(raw != NULL);
     
         current_program = pid;
@@ -1021,7 +1021,7 @@ static void end(id pid)
 
     struct vga_program *raw;
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (memcmp(&current_depth, &raw->depth, sizeof(depth_opt)) != 0) {
@@ -1073,7 +1073,7 @@ static void end(id pid)
     while (id_validate(obj)) {
         if (!id_equal(current_tex[index], obj)) {
             current_tex[index] = obj;
-            fetch(obj, &tex);
+            vga_texture_fetch(obj, &tex);
             glActiveTexture(GL_TEXTURE0 + index);
             glBindTexture(GL_TEXTURE_2D, tex->glid);
             glUniform1i(glGetUniformLocation(raw->glid, k.ptr), (int)index);
@@ -1090,7 +1090,7 @@ void vga_program_draw_array(id pid, id group, unsigned mode, int first, int coun
     begin(pid);
     end(pid);
 
-    fetch(group, &vag);
+    vga_attribute_group_fetch(group, &vag);
     assert(vag != NULL);
     
     glBindVertexArray(vag->glid);
@@ -1104,7 +1104,7 @@ void vga_program_set_texture(id pid, id tex, const char *name, const signed inde
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     map_set(raw->mtexs, key_chars(name), tex);
@@ -1117,7 +1117,7 @@ void vga_program_set_uniform_int(id pid, int value, const char *name, const sign
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     i = glGetUniformLocation(raw->glid, name);
@@ -1131,7 +1131,7 @@ void vga_program_set_uniform_float(id pid, float value, const char *name, const 
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     i = glGetUniformLocation(raw->glid, name);
@@ -1145,7 +1145,7 @@ void vga_program_set_uniform_vec2_scalar(id pid, float x, float y, const char *n
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     i = glGetUniformLocation(raw->glid, name);
@@ -1159,7 +1159,7 @@ void vga_program_set_uniform_vec3_scalar(id pid, float x, float y, float z, cons
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     i = glGetUniformLocation(raw->glid, name);
@@ -1173,7 +1173,7 @@ void vga_program_set_uniform_vec4_scalar(id pid, float x, float y, float z, floa
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     i = glGetUniformLocation(raw->glid, name);
@@ -1187,7 +1187,7 @@ void vga_program_set_uniform_mat4_scalar(id pid, float m[16], const char *name, 
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     i = glGetUniformLocation(raw->glid, name);
@@ -1202,7 +1202,7 @@ void vga_program_set_uniform_vec2(id pid, id vid, const char *name, const signed
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
     i = glGetUniformLocation(raw->glid, name);
     vec2_get(vid, &x, &y);
@@ -1217,7 +1217,7 @@ void vga_program_set_uniform_vec3(id pid, id vid, const char *name, const signed
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
     i = glGetUniformLocation(raw->glid, name);
     vec3_get(vid, &x, &y, &z);
@@ -1232,7 +1232,7 @@ void vga_program_set_uniform_vec4(id pid, id vid, const char *name, const signed
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
     i = glGetUniformLocation(raw->glid, name);
     vec4_get(vid, &x, &y, &z, &w);
@@ -1247,7 +1247,7 @@ void vga_program_set_uniform_mat4(id pid, id vid, const char *name, const signed
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
     i = glGetUniformLocation(raw->glid, name);
     mat4_get(vid, m);
@@ -1260,7 +1260,7 @@ void vga_program_set_depth(id pid, const depth_opt opt)
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     raw->depth = opt;
@@ -1272,7 +1272,7 @@ void vga_program_set_stencil(id pid, const stencil_opt opt)
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     raw->stencil = opt;
@@ -1284,7 +1284,7 @@ void vga_program_set_blend(id pid, const blend_opt opt)
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     raw->blend = opt;
@@ -1296,7 +1296,7 @@ void vga_program_set_cull(id pid, const cull_opt opt)
 
     begin(pid);
 
-    fetch(pid, &raw);
+    vga_program_fetch(pid, &raw);
     assert(raw != NULL);
 
     raw->cull = opt;

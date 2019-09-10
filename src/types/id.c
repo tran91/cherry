@@ -146,7 +146,7 @@ void retain(id pid)
     }
 }
 
-void fetch(id pid, void *pt)
+void fetch(id pid, unsigned type, void *pt)
 {
     void **p = pt;
     struct data *d;
@@ -159,6 +159,7 @@ void fetch(id pid, void *pt)
     if (!d) {
         *p = NULL;
     } else {
+        assert(d->type == type); /* protect data type */
         *p = d + 1;
     }
 }

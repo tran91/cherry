@@ -93,6 +93,6 @@ void map_iterate(id map, unsigned index, key *k, id *object);
  * 
  *      map_clear(map);
  */
-void map_clear(id map);
+void map_remove_all(id map);
 
 #endif

@@ -14,7 +14,7 @@ struct image
 };
 make_type(image);
 
-static void init(struct image *p, key k)
+static void image_init(struct image *p, key k)
 {
     p->ptr = NULL;
     p->width = 0;
@@ -22,7 +22,7 @@ static void init(struct image *p, key k)
     p->channels = 0;
 }
 
-static void clear(struct image *p)
+static void image_clear(struct image *p)
 {
     if (p->ptr) {
         free(p->ptr);
@@ -247,9 +247,9 @@ void image_load_file(id pid, const char *path)
     int test;
     png_byte header[8];
 
-    fetch(pid, &raw);
+    image_fetch(pid, &raw);
     assert(raw != NULL);
-    clear(raw);
+    image_clear(raw);
     file_new(&fid);
     file_open(fid, path);
     file_read(fid, header, 8, &rv);
@@ -266,7 +266,7 @@ void image_get_size(id pid, unsigned *width, unsigned *height)
 {
     struct image *raw;
 
-    fetch(pid, &raw);
+    image_fetch(pid, &raw);
     assert(raw != NULL);
 
     *width = raw->width;
@@ -277,7 +277,7 @@ void image_get_ptr(id pid, const unsigned char **ptr)
 {
     struct image *raw;
 
-    fetch(pid, &raw);
+    image_fetch(pid, &raw);
     assert(raw != NULL);
 
     *ptr = raw->ptr;
@@ -287,7 +287,7 @@ void image_get_number_channels(id pid, unsigned *count)
 {
     struct image *raw;
 
-    fetch(pid, &raw);
+    image_fetch(pid, &raw);
     assert(raw != NULL);
 
     *count = raw->channels;

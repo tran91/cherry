@@ -157,6 +157,6 @@ void vector_get_size(id pid, unsigned *s);
  * 
  *      vector_clear(v);
  */
-void vector_clear(id pid);
+void vector_remove_all(id pid);
 
 #endif

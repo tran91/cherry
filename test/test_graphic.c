@@ -15,7 +15,7 @@ struct tester
         id image;
     } program;
 };
-make_type_detail(tester);
+make_type(tester);
 
 static float positions[] = {
     1, 1, 0,
@@ -52,7 +52,7 @@ static void tester_setup(id pid, unsigned width, unsigned height, unsigned glid)
     struct tester *raw;
     id attr;
 
-    fetch(pid, &raw);
+    tester_fetch(pid, &raw);
     assert(raw != NULL);
 
 #ifdef BUILD_OPENGL
@@ -88,7 +88,7 @@ static void tester_update(id pid)
     struct tester *raw;
     id tex;
 
-    fetch(pid, &raw);
+    tester_fetch(pid, &raw);
     assert(raw != NULL);
 
     /*

@@ -73,7 +73,7 @@ struct ssl_context
 {
     SSL_CTX *ctx;
 };
-make_type_detail(ssl_context);
+make_type(ssl_context);
 
 static void ssl_context_init(struct ssl_context *p, key k)
 {
@@ -94,7 +94,7 @@ static void ssl_context_new_client(id *pid)
     struct ssl_context *raw;
 
     ssl_context_new(pid);
-    fetch(*pid, &raw);
+    ssl_context_fetch(*pid, &raw);
     lock(&ssl_barrier);
     raw->ctx = SSL_CTX_new(SSLv23_client_method());
     unlock(&ssl_barrier);
@@ -109,7 +109,7 @@ static void ssl_context_new_server(id *pid, const char *cert, const char *key)
     struct ssl_context *raw;
 
     ssl_context_new(pid);
-    fetch(*pid, &raw);
+    ssl_context_fetch(*pid, &raw);
     lock(&ssl_barrier);
     raw->ctx = SSL_CTX_new(SSLv23_method());
     unlock(&ssl_barrier);
@@ -144,7 +144,7 @@ struct socket
 };
 make_type(socket);
 
-static void init(struct socket *p, key k)
+static void socket_init(struct socket *p, key k)
 {
     p->sd = -1;
     p->ssl = NULL;
@@ -154,7 +154,7 @@ static void init(struct socket *p, key k)
     p->non_blocking = 0;
 }
 
-static void clear(struct socket *p)
+static void socket_clear(struct socket *p)
 {
     if (p->ssl) {
         SSL_free(p->ssl);
@@ -178,7 +178,7 @@ static void socket_set_non_blocking(id pid, int *flags)
 {
     struct socket *raw;
 
-    fetch(pid, &raw);
+    socket_fetch(pid, &raw);
     assert(raw != NULL);
 
 	*flags = fcntl(raw->sd, F_GETFL, 0);
@@ -201,9 +201,9 @@ void socket_connect(id pid, const char *address, const unsigned port)
     char s[INET6_ADDRSTRLEN], sport[10];
     struct socket *raw;
 
-    fetch(pid, &raw);
+    socket_fetch(pid, &raw);
     assert(raw != NULL);
-    clear(raw);
+    socket_clear(raw);
 
     raw->address = realloc(raw->address, strlen(address) + 1);
     strcpy(raw->address, address);
@@ -255,7 +255,7 @@ void socket_connect_ssl(id pid, const char *address, const unsigned port)
     struct ssl_context *sc;
     int rv;
 
-    fetch(pid, &raw);
+    socket_fetch(pid, &raw);
     assert(raw != NULL);
     socket_connect(pid, address, port);
     if (raw->sd == -1) {
@@ -263,7 +263,7 @@ void socket_connect_ssl(id pid, const char *address, const unsigned port)
     }
     ssl_context_new_client(&raw->ctx);
     if (id_validate(raw->ctx)) {
-        fetch(raw->ctx, &sc);
+        ssl_context_fetch(raw->ctx, &sc);
         raw->ssl = SSL_new(sc->ctx);
         SSL_set_fd(raw->ssl, raw->sd);
 
@@ -301,9 +301,9 @@ void socket_bind(id pid, const unsigned port)
     int rv, yes = 1;
     char sport[10];
 
-    fetch(pid, &raw);
+    socket_fetch(pid, &raw);
     assert(raw != NULL);
-    clear(raw);
+    socket_clear(raw);
 
     raw->port = port;
     sprintf(sport, "%d", raw->port);
@@ -373,7 +373,7 @@ void socket_bind_ssl(id pid, const unsigned port, const char *cert, const char *
 {
     struct socket *raw;
 
-    fetch(pid, &raw);
+    socket_fetch(pid, &raw);
     assert(raw != NULL);
     socket_bind(pid, port);
     if (raw->sd == -1) {
@@ -396,7 +396,7 @@ void socket_send(id pid, const char *buf, signed len, signed *ret)
     int bytesleft = len;
     int n;
 
-    fetch(pid, &raw);
+    socket_fetch(pid, &raw);
     assert(raw != NULL);
 
     if (raw->sd == -1) {
@@ -445,9 +445,9 @@ void socket_read(id pid, id buf)
     int n;
     char tmp[4097];
 
-    fetch(pid, &raw);
+    socket_fetch(pid, &raw);
     assert(raw != NULL);
-    buffer_clear(buf);
+    buffer_erase(buf);
 
     if (raw->sd < 0) {
         return;
@@ -495,7 +495,7 @@ void socket_run(id pid, id user, socket_callback cb)
 	int infd;
     id buf = id_null;
 
-    fetch(pid, &raw);
+    socket_fetch(pid, &raw);
     assert(raw != NULL);
 
     epoll_fd = epoll_create1(0);
@@ -544,7 +544,7 @@ void socket_run(id pid, id user, socket_callback cb)
                     /* create new incomming socket */
                     cl = malloc(sizeof(id));
                     socket_new(cl);
-                    fetch(*cl, &client);
+                    socket_fetch(*cl, &client);
                     client->sd = infd;
                     client->ctx = raw->ctx;
                     retain(client->ctx);
@@ -558,7 +558,7 @@ void socket_run(id pid, id user, socket_callback cb)
                         goto next;
                     } else {
                         /* trying to enable socket ssl state */
-                        fetch(client->ctx, &ctx);
+                        ssl_context_fetch(client->ctx, &ctx);
                         if (ctx) {                            
                             client->ssl = SSL_new(ctx->ctx);
                             SSL_set_fd(client->ssl, client->sd);

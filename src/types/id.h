@@ -70,7 +70,6 @@ void create(unsigned type, id *pid);
 void build(id pid, key k);
 void retain(id pid);
 void release(id pid);
-void fetch(id pid, void *p);
 
 /* 
  * register type
@@ -78,54 +77,11 @@ void fetch(id pid, void *p);
 #include "map.h"
 
 #define type(name) \
+struct name;\
 void name##_shared(key k, id *pid);\
 void name##_new(id *pid);
 
 #define make_type(name)\
-static id cache = id_init;\
-static void clean()\
-{\
-    release(cache);\
-}\
-static signed type = -1;\
-static volatile unsigned barrier = 0;\
-struct name;\
-static void init(struct name *s, key k);\
-static void clear(struct name *s);\
-void name##_shared(key k, id *pid)\
-{\
-    require((void(*)(void*, key))init, (void(*)(void*))clear, sizeof(struct name), &type);\
-\
-    if (!id_validate(cache)) {\
-        map_shared(key_null, &cache);\
-        atexit(clean);\
-    }\
-\
-    if (k.type >= 1) {\
-        lock(&barrier);\
-        map_get(cache, k, pid);\
-        if (id_validate(*pid)) {\
-            retain(*pid);\
-            unlock(&barrier);\
-        } else {\
-            create(type, pid);\
-            map_set(cache, k, *pid);\
-            unlock(&barrier);\
-            build(*pid, k);\
-        }\
-    } else {\
-        create(type, pid);\
-        build(*pid, k);\
-    }\
-}\
-void name##_new(id *pid)\
-{\
-    require((void(*)(void*, key))init, (void(*)(void*))clear, sizeof(struct name), &type);\
-    create(type, pid);\
-    build(*pid, key_null);\
-}
-
-#define make_type_detail(name)\
 static id name##_cache = id_init;\
 static void name##_clean()\
 {\
@@ -136,6 +92,11 @@ static volatile unsigned name##_barrier = 0;\
 struct name;\
 static void name##_init(struct name *s, key k);\
 static void name##_clear(struct name *s);\
+static void name##_fetch(id pid, struct name **ptr)\
+{\
+    void fetch(id pid, unsigned type, void *p);\
+    fetch(pid, (unsigned)name##_type, ptr);\
+}\
 void name##_shared(key k, id *pid)\
 {\
     require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
