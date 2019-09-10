@@ -42,6 +42,25 @@ void vector_push(id pid, id cid)
     retain(cid);
 }
 
+void vector_push_vector(id pid, id cid)
+{
+    struct vector *r1, *r2;
+    int i;
+    
+    fetch(pid, &r1);
+    fetch(cid, &r2);
+    assert(r1 != NULL && r2 != NULL);
+
+    if (r2->len == 0) return;
+
+    r1->start = realloc(r1->start, sizeof(id) * (r1->len + r2->len));
+    for (i = 0; i < r2->len; ++i) {
+        r1->start[r1->len + i] = r2->start[i];
+        retain(r2->start[i]);
+    }
+    r1->len += r2->len;
+}
+
 void vector_set(id pid, unsigned index, id cid)
 {    
     struct vector *raw;
@@ -104,6 +123,28 @@ void vector_remove(id pid, unsigned index)
     }
     raw->len--;
     release(cid);
+}
+
+void vector_remove_id(id pid, id obj)
+{
+    struct vector *raw;
+    int i;
+    id cid;
+    
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    for (i = 0; i < raw->len; ++i) {
+        cid = raw->start[i];
+        if (id_equal(obj, cid)) {
+            if (i < raw->len - 1) {
+                memmove(raw->start + i, raw->start + i + 1, sizeof(id) * (raw->len - i - 1));
+            }
+            raw->len--;
+            i--;
+            release(cid);
+        }
+    }
 }
 
 void vector_swap(id pid, unsigned idx1, unsigned idx2)

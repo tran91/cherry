@@ -53,6 +53,7 @@ typedef struct key
     };
 } key;
 
+#define key_mem(p, l) (key){.type = KEY_LITERAL, .ptr = p, .len = l} 
 #define key_chars(p) (key){.type = KEY_LITERAL, .ptr = p, .len = strlen(p)} 
 #define key_literal(p) (key){.type = KEY_LITERAL, .ptr = p, .len = sizeof(p) - 1}
 #define key_id(p) (key){.type = KEY_ID, .kid = p}

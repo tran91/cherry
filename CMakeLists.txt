@@ -131,6 +131,10 @@ if (USE_OPENGL)
 		add_dependencies(test_https cherry ${OPENGL_APPLICATION})
 		target_link_libraries(test_https cherry ${OPENGL_APPLICATION})
 
+		add_executable(test_xml "test/test_xml.c")
+		add_dependencies(test_xml cherry ${OPENGL_APPLICATION})
+		target_link_libraries(test_xml cherry ${OPENGL_APPLICATION})
+
 		add_executable(test_graphic "test/test_graphic.c")
 		add_dependencies(test_graphic cherry ${OPENGL_APPLICATION})
 		target_link_libraries(test_graphic cherry ${OPENGL_APPLICATION})

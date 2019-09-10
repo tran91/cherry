@@ -22,6 +22,24 @@ type(vector);
  */
 void vector_push(id pid, id cid);
 
+/*
+ * @pid: vector
+ * 
+ * example:
+ *      id v;
+ *      vector_new(&v);
+ * 
+ *      ...
+ * 
+ *      id v2;
+ *      vector_new(&v2);
+ * 
+ *      ...
+ * 
+ *      vector_push_vector(v, v2);
+ */
+void vector_push_vector(id pid, id cid);
+
 void vector_set(id pid, unsigned index, id cid);
 
 /*
@@ -55,6 +73,25 @@ void vector_get(id pid, unsigned index, id *cid);
  *      vector_remove(v, 0);
  */
 void vector_remove(id pid, unsigned index);
+
+/*
+ * @pid: vector
+ * 
+ * example:
+ *      id v;
+ *      vector_new(&v);
+ * 
+ *      ...
+ * 
+ *      id obj;
+ *      ...
+ *      vector_push(v, obj);
+ *      
+ *      ...
+ * 
+ *      vector_remove_id(v, obj);
+ */
+void vector_remove_id(id pid, id obj);
 
 /*
  * @pid: vector

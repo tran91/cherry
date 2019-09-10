@@ -1,0 +1,12 @@
+<root version="1.0">
+    <element tag="tag1">Hello</element>
+    <element tag="tag2">World</element>
+    <style>
+        <element tag="tag3">From</element>
+        <style>
+            <element tag="tag4">Cherry</element>
+            
+            <element-exclusive tag="tag5"></element-exclusive>
+        </style>
+    </style>
+</root>
