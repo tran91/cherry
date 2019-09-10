@@ -193,6 +193,7 @@ create:
     switch (k.type) {
     case KEY_LITERAL:
         n->k.ptr = malloc(k.len + 1);
+        n->k.len = k.len;
         memcpy((void *)n->k.ptr, k.ptr, k.len);
         ((char *)n->k.ptr)[k.len] = '\0'; 
         break;

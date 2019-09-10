@@ -881,6 +881,7 @@ struct vga_program
     stencil_opt stencil;
     blend_opt blend;
     cull_opt cull;
+    id mtexs;
 };
 make_type_detail(vga_program);
 
@@ -888,6 +889,7 @@ static void vga_program_init(struct vga_program *p, key k)
 {
     memset(p, 0, sizeof(struct vga_program));
     p->glid = 0;
+    map_new(&p->mtexs);
 }
 
 static void vga_program_clear(struct vga_program *p)
@@ -896,6 +898,7 @@ static void vga_program_clear(struct vga_program *p)
         glDeleteProgram(p->glid);
         p->glid = 0;
     }
+    release(p->mtexs);
 }
 
 #define LITERAL(p) p, sizeof(p) - 1
@@ -934,6 +937,7 @@ void vga_program_load(id pid, const char *vert_path, const char *frag_path)
     fetch(pid, &raw);
     assert(raw != NULL);
     vga_program_clear(raw);
+    map_new(&raw->mtexs);
 
     buffer_new(&vbuf);
     buffer_new(&fbuf);
@@ -1009,6 +1013,11 @@ static void end(id pid)
     static stencil_opt current_stencil;
     static blend_opt current_blend;
     static cull_opt current_cull;
+    static id current_tex[32] = {id_null};
+    struct vga_texture *tex;
+    key k;
+    id obj;
+    unsigned index;
 
     struct vga_program *raw;
 
@@ -1058,6 +1067,23 @@ static void end(id pid)
             glDisable(GL_CULL_FACE);
         }
     }
+
+    index = 0;
+    map_iterate(raw->mtexs, index, &k, &obj);
+    while (id_validate(obj)) {
+
+        if (!id_equal(current_tex[index], obj)) {
+            current_tex[index] = obj;
+
+            fetch(obj, &tex);
+            glActiveTexture(GL_TEXTURE0 + index);
+            glBindTexture(GL_TEXTURE_2D, tex->glid);
+            glUniform1i(glGetUniformLocation(raw->glid, k.ptr), (int)index);
+        }
+
+        index++;
+        map_iterate(raw->mtexs, index, &k, &obj);
+    }
 }
 
 void vga_program_draw_array(id pid, id group, unsigned mode, int first, int count)
@@ -1073,6 +1099,18 @@ void vga_program_draw_array(id pid, id group, unsigned mode, int first, int coun
     glBindVertexArray(vag->glid);
     glDrawArrays(mode, first, count);
     glBindVertexArray(0);
+}
+
+void vga_program_set_texture(id pid, id tex, const char *name, const signed index)
+{
+    struct vga_program *raw;
+
+    begin(pid);
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    map_set(raw->mtexs, key_chars(name), tex);
 }
 
 void vga_program_set_uniform_int(id pid, int value, const char *name, const signed index)

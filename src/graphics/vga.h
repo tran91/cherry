@@ -127,6 +127,11 @@ void vga_program_draw_array(id pid, id group, unsigned mode, int first, int coun
 /*
  * @pid: vga_program
  */
+void vga_program_set_texture(id pid, id tex, const char *name, const signed index);
+
+/*
+ * @pid: vga_program
+ */
 void vga_program_set_uniform_int(id pid, int value, const char *name, const signed index);
 void vga_program_set_uniform_float(id pid, float value, const char *name, const signed index);
 void vga_program_set_uniform_vec2_scalar(id pid, float x, float y, const char *name, const signed index);
