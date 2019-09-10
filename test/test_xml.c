@@ -50,6 +50,7 @@ int main(int argc, char **argv)
     search(query, node, "//element[@tag=\"tag3\" opt=\"1\"]");
     search(query, node, "./@version");
     search(query, node, "@version");
+    search(query, node, "/element/@tag");
     search(query, node, "//element/@tag");
     search(query, node, "//@tag");
 
