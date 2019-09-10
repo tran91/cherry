@@ -56,7 +56,6 @@ typedef struct id {
  */
 void retain(id pid); /* increase memory counter held by id by 1 */
 void release(id pid); /* decrease memory counter held by id by 1 */
-void fetch(id pid, void *ptr); /* get memory held by id */
 ```
 
 ## Example
@@ -83,13 +82,13 @@ struct your_data {
 };
 make_type(your_data);
 
-static void init(struct your_data *p, key k)
+static void your_data_init(struct your_data *p, key k)
 {
     p->ptr = NULL;
     p->len = 0;
 }
 
-static void clear(struct your_data *p)
+static void your_data_clear(struct your_data *p)
 {
     if (p->ptr) {
         free(p->ptr);
@@ -102,7 +101,7 @@ void your_data_get_ptr(id pid, const char **ptr)
 {
     struct your_data *raw;
     
-    fetch(pid, &raw);
+    your_data_fetch(pid, &raw);
     assert(raw != NULL);
     
     *ptr = raw->ptr;
@@ -112,7 +111,7 @@ void your_data_append(id pid, const char *buf, const unsigned len)
 {
     struct your_data *raw;
     
-    fetch(pid, &raw);
+    your_data_fetch(pid, &raw);
     assert(raw != NULL);
     
     raw->ptr = realloc(raw->ptr, raw->len + len + 1);
