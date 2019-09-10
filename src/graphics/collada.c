@@ -234,6 +234,17 @@ static void collada_node_clear(struct collada_node *p)
     release(p->transform);
 }
 
+void dump()
+{
+    id test;
+    collada_context_fetch(test, NULL);
+    collada_mesh_fetch(test, NULL);
+    collada_skin_fetch(test, NULL);
+    collada_bone_fetch(test, NULL);
+    collada_amature_fetch(test, NULL);
+    collada_node_fetch(test, NULL);
+}
+
 void collada_context_load_file(id pid, const char *path)
 {
 
