@@ -689,6 +689,184 @@ void vga_framebuffer_get_texture(id pid, const char *name, id *tex)
     map_get(raw->resolver.mtexs, key_chars(name), tex);
 }
 
+void vga_framebuffer_begin(id pid)
+{
+    struct vga_framebuffer *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    if (raw->resolver.created == 0) return;
+
+    if (raw->sampler.created) {
+        glBindFramebuffer(GL_FRAMEBUFFER, raw->sampler.glid);
+        glViewport(0, 0, raw->width, raw->height);
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, raw->resolver.glid);
+        glViewport(0, 0, raw->width, raw->height);
+        glClearColor(0, 0, 0, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    }
+}
+
+void vga_framebuffer_end(id pid)
+{
+    struct vga_framebuffer *raw;
+    unsigned len;
+    int i;
+    unsigned draw[32] = {GL_NONE};
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    if (raw->resolver.created == 0) return;
+
+    if (raw->sampler.created) {
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, raw->sampler.glid);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, raw->resolver.glid);
+
+        vector_get_size(raw->resolver.vtexs, &len);
+        for (i = 0; i < len; ++i) {
+            draw[i] = GL_COLOR_ATTACHMENT0 + i;
+            glReadBuffer(draw[i]);
+            glDrawBuffers(len, draw);
+            glBlitFramebuffer(
+                0, 0, raw->width, raw->height,
+                0, 0, raw->width, raw->height,
+                GL_COLOR_BUFFER_BIT, GL_LINEAR);
+            draw[i] = GL_NONE;
+        }
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    } else {
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+}
+
+/*
+ * screen
+ */
+struct vga_screen
+{
+    unsigned glid;
+    unsigned width;
+    unsigned height;
+};
+make_type_detail(vga_screen);
+
+static void vga_screen_init(struct vga_screen *p, key k)
+{
+    p->glid = 0;
+    p->width = 0;
+    p->height = 0;
+}
+
+static void vga_screen_clear(struct vga_screen *p)
+{
+
+}
+
+void vga_screen_set_size(id pid, unsigned width, unsigned height)
+{
+    struct vga_screen *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    raw->width = width;
+    raw->height = height;
+}
+
+void vga_screen_get_size(id pid, unsigned *width, unsigned *height)
+{
+    struct vga_screen *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    *width = raw->width;
+    *height = raw->height;
+}
+
+void vga_screen_set_glid(id pid, unsigned glid)
+{
+    struct vga_screen *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    raw->glid = glid;
+}
+
+static void vga_screen_get_glid(id pid, unsigned *glid)
+{
+    struct vga_screen *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    *glid = raw->glid;
+}
+
+/*
+ * screenbuffer
+ */
+struct vga_screenbuffer
+{
+    unsigned glid;
+    unsigned width;
+    unsigned height;
+    id scr;
+};
+make_type_detail(vga_screenbuffer);
+
+static void vga_screenbuffer_init(struct vga_screenbuffer *p, key k)
+{
+    p->glid = 0;
+    p->scr = id_null;
+}
+
+static void vga_screenbuffer_clear(struct vga_screenbuffer *p)
+{
+    release(p->scr);
+}
+
+void vga_screenbuffer_begin(id pid)
+{
+    struct vga_screenbuffer *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, raw->glid);
+    glViewport(0, 0, raw->width, raw->height);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+void vga_screenbuffer_end(id pid)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void vga_screenbuffer_set_screen(id pid, id sid)
+{
+    struct vga_screenbuffer *raw;
+
+    fetch(pid, &raw);
+    assert(raw != NULL);
+
+    retain(sid);
+    release(raw->scr);
+    raw->scr = sid;
+
+    vga_screen_get_size(sid, &raw->width, &raw->height);
+    vga_screen_get_glid(sid, &raw->glid);
+}
+
 /*
  * programs
  */

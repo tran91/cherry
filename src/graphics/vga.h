@@ -96,6 +96,17 @@ void vga_framebuffer_set_depth(id pid, char depth, char stencil);
 void vga_framebuffer_set_multisampling(id pid, unsigned char samples);
 void vga_framebuffer_add_texture(id pid, const char *name);
 void vga_framebuffer_get_texture(id pid, const char *name, id *tex);
+void vga_framebuffer_begin(id pid);
+void vga_framebuffer_end(id pid);
+
+type(vga_screen);
+void vga_screen_get_size(id pid, unsigned *width, unsigned *height);
+void vga_screen_set_size(id pid, unsigned width, unsigned height);
+
+type(vga_screenbuffer);
+void vga_screenbuffer_begin(id pid);
+void vga_screenbuffer_end(id pid);
+void vga_screenbuffer_set_screen(id pid, id sid);
 
 /*
  * program
