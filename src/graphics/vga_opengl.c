@@ -1008,7 +1008,7 @@ static void begin(id pid)
 
 static void end(id pid)
 {
-    /* depth and stencil affects global state in opengl */
+    /* depth, stencil, blend, cull and texture states are independent with program state */
     static depth_opt current_depth;
     static stencil_opt current_stencil;
     static blend_opt current_blend;
@@ -1071,16 +1071,13 @@ static void end(id pid)
     index = 0;
     map_iterate(raw->mtexs, index, &k, &obj);
     while (id_validate(obj)) {
-
         if (!id_equal(current_tex[index], obj)) {
             current_tex[index] = obj;
-
             fetch(obj, &tex);
             glActiveTexture(GL_TEXTURE0 + index);
             glBindTexture(GL_TEXTURE_2D, tex->glid);
             glUniform1i(glGetUniformLocation(raw->glid, k.ptr), (int)index);
         }
-
         index++;
         map_iterate(raw->mtexs, index, &k, &obj);
     }

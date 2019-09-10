@@ -91,11 +91,17 @@ static void tester_update(id pid)
     fetch(pid, &raw);
     assert(raw != NULL);
 
+    /*
+     * render to user framebuffer
+     */
     vga_framebuffer_begin(raw->fb);
     vga_program_set_uniform_vec4_scalar(raw->program.quad, 1, 1, 1, 1, "u_color", 0);
     vga_program_draw_array(raw->program.quad, raw->group, VGA_TRIANGLES, 0, 6);
     vga_framebuffer_end(raw->fb);
 
+    /*
+     * flush framebuffer to screen
+     */
     vga_framebuffer_get_texture(raw->fb, "diffuse", &tex);
     vga_screenbuffer_begin(raw->screen_buffer);
     vga_program_set_texture(raw->program.image, tex, "diffuse", 0);
@@ -110,7 +116,6 @@ int main(int argc, char **argv)
     SDL_Window* glwindow;
     SDL_GLContext glcontext;
     SDL_DisplayMode DM;
-
     unsigned width = 800;
     unsigned height = 480;
 
@@ -118,7 +123,6 @@ int main(int argc, char **argv)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-
     SDL_GetCurrentDisplayMode(0, &DM);
     glwindow = SDL_CreateWindow("", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
             width, height, SDL_WINDOW_OPENGL);
@@ -127,19 +131,15 @@ int main(int argc, char **argv)
 
     tester_new(&tstr);
     tester_setup(tstr, width, height, 0);
-
     while (1) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT || (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE)) {
                 goto finish;
             }
         }
-
         tester_update(tstr);
-
         SDL_GL_SwapWindow(glwindow);
     }
-
 finish:
     release(tstr);
     SDL_GL_DeleteContext(glcontext);
