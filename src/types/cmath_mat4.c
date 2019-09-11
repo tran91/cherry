@@ -38,6 +38,38 @@ static void mat4_clear(struct mat4 *p)
 
 }
 
+void mat4_load_string(id pid, const char *buf)
+{
+    struct mat4 *raw;
+
+    mat4_fetch(pid, &raw);
+    assert(raw != NULL);
+
+    const char *ptr = buf;
+    char * endptr;
+    int i = 0;
+
+next:
+    if(!ptr || !*ptr || i == 16) goto end;
+
+    switch (*ptr) {
+    case '1': case '2': case '3':
+    case '4': case '5': case '6':
+    case '7': case '8': case '9':
+    case '0': case '+': case '-':
+        raw->m[i] = (float)strtod(ptr, &endptr);
+        ptr = endptr;
+        i++;
+        goto next;
+    default:
+        ptr++;
+        goto next;
+    }
+
+end:
+    ;
+}
+
 void mat4_set_identity(id pid)
 {
     struct mat4 *raw;
@@ -51,7 +83,7 @@ void mat4_set_identity(id pid)
     raw->m33 = 1;
 }
 
-void mat4_set_array(id pid, float f[16])
+void mat4_set_array(id pid, const float f[16])
 {
     struct mat4 *raw;
 

@@ -11,6 +11,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <errno.h>
+#include <ctype.h>
 #include <sys/stat.h>
 
 #define ARGS(...) __VA_ARGS__
@@ -70,6 +71,13 @@ void create(unsigned type, id *pid);
 void build(id pid, key k);
 void retain(id pid);
 void release(id pid);
+
+#define assign(id1, id2) \
+    do {\
+        retain(id2);\
+        release(id1);\
+        id1 = id2;\
+    } while (0);
 
 /* 
  * register type

@@ -435,7 +435,7 @@ name:
 	switch (*ptr) {
 		case ' ': case '\t': case '\n':
 		case '\v': case '\f': case '\r':
-		case '\0': case '/':
+		case '\0': case '/': case '>':
 			name[0] = start + 1;
 			name[1] = ptr - 1;
 			value[0] = value_start;
@@ -448,7 +448,7 @@ name:
 				__xml_node_set_value(pid, value[0], value[1] - value[0] + 1);
 			}
 
-			if(*ptr == '\0') {
+			if(*ptr == '\0' || *ptr == '>') {
 				goto finish;
 			}
 			ptr_prev = ptr;
@@ -473,7 +473,7 @@ search_attribute:
 			ptr_prev = ptr;
 			ptr++;
 			goto search_attribute;
-		case '/': case '=': case '\0':
+		case '/': case '=': case '\0': case '>':
 			goto finish;
 		default:
 			break;
@@ -488,7 +488,7 @@ read_attribute_name:
 			name[1] = ptr_prev;
 			ptr++;
 			break;
-		case '/': case '\0':
+		case '/': case '\0': case '>':
 			goto finish;
 		default:
 			ptr_prev = ptr;
@@ -505,7 +505,7 @@ search_value:
 			ptr_prev = ptr;
 			ptr++;
 			break;
-		case '/': case '=': case '\0':
+		case '/': case '=': case '\0': case '>':
 			goto finish;
 		default:
 			ptr_prev = ptr;

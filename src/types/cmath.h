@@ -97,8 +97,9 @@ void vec4_get_b(id pid, float *n);
 void vec4_get_a(id pid, float *n);
 
 type(mat4);
+void mat4_load_string(id pid, const char *ptr);
 void mat4_set_identity(id pid);
-void mat4_set_array(id pid, float f[16]);
+void mat4_set_array(id pid, const float f[16]);
 void mat4_inverse(id pid);
 void mat4_transpose(id pid);
 void mat4_set_perspective(id pid, float fov, float aspect, float near, float far);
@@ -117,5 +118,35 @@ void mat4_rotate_x(id pid, float radian);
 void mat4_rotate_y(id pid, float radian);
 void mat4_rotate_z(id pid, float radian);
 void mat4_get(id pid, float m[16]);
+
+#ifndef MIN
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#endif
+
+#ifndef MAX
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#endif
+
+#ifndef DEG_TO_RAD
+#define DEG_TO_RAD(X) ((X) * M_PI / 180)
+#endif
+
+#ifndef RAD_TO_DEG
+#define RAD_TO_DEG(X) ((X) * 180 / M_PI)
+#endif
+
+#ifndef EPSILON
+#define EPSILON 0.0000000016
+#endif
+
+static inline float rand_rf(float min, float max)
+{
+        return ((max - min) * MIN(0.999f,((float)rand()/(float)(RAND_MAX)))) + min;
+}
+
+static inline int rand_ri(int min, int max)
+{
+        return (int)((max - min) * MIN(0.999f,((float)rand() / (float)RAND_MAX))) + min;
+}
 
 #endif

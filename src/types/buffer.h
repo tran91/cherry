@@ -26,10 +26,19 @@ void buffer_append(id pid, const void *buf, const unsigned len);
  */
 void buffer_append_buffer(id pid, id cid);
 
+void buffer_append_float_string(id pid, const char *ptr, float *max);
+void buffer_append_int_string(id pid, const char *ptr, int *max);
+
+/*
+ * @pid: buffer
+ */
+void buffer_reserve(id pid, unsigned len);
+
 /*
  * @pid: buffer
  */
 void buffer_get_length(id pid, unsigned *len);
+void buffer_get_length_with_stride(id pid, unsigned stride, unsigned *len);
 
 /*
  * @pid: buffer

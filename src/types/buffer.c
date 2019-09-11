@@ -1,12 +1,22 @@
 #include "buffer.h"
 #include "file.h"
+#include "cmath.h"
 
 struct buffer
 {
     unsigned char *ptr;
     unsigned len;
+    unsigned reserved;
 };
 make_type(buffer);
+
+static inline void __realloc(struct buffer *p, const unsigned size)
+{
+    if (p->reserved < size) {
+        p->reserved = size;
+        p->ptr = realloc(p->ptr, p->reserved);
+    }
+}
 
 static void load_file(struct buffer *p, const char *path)
 {
@@ -18,7 +28,7 @@ static void load_file(struct buffer *p, const char *path)
     file_open(fid, path);
     file_read(fid, buf, 8192, &count);
     while (count > 0) {
-        p->ptr = realloc(p->ptr, p->len + count + 1);
+        __realloc(p, p->len + count + 1);
         memcpy(p->ptr + p->len, buf, count);
         p->len += count;
         p->ptr[p->len] = '\0';
@@ -31,6 +41,7 @@ static void buffer_init(struct buffer *p, key k)
 {
     p->ptr = NULL;
     p->len = 0;
+    p->reserved = 0;
 
     if (k.type != KEY_LITERAL) return;
 
@@ -46,6 +57,7 @@ static void buffer_clear(struct buffer *p)
         free(p->ptr);
         p->ptr = NULL;
         p->len = 0;
+        p->reserved = 0;
     }
 }
 
@@ -56,6 +68,14 @@ void buffer_erase(id pid)
     buffer_fetch(pid, &raw);
     assert(raw != NULL);
     raw->len = 0;
+}
+
+void buffer_reserve(id pid, unsigned len)
+{
+    struct buffer *raw;
+
+    buffer_fetch(pid, &raw);
+    assert(raw != NULL);
 }
 
 void buffer_append_file(id pid, const char *path)
@@ -72,11 +92,11 @@ void buffer_append(id pid, const void *buf, const unsigned len)
 {
     struct buffer *raw;
 
-    if (len == 0 || !buf) return;
+    if (len == 0) return;
 
     buffer_fetch(pid, &raw);
     assert(raw != NULL);
-    raw->ptr = realloc(raw->ptr, raw->len + len + 1);
+    __realloc(raw, raw->len + len + 1);
     memcpy(raw->ptr + raw->len, buf, len);
     raw->len += len;
     raw->ptr[raw->len] = '\0';
@@ -91,6 +111,78 @@ void buffer_append_buffer(id pid, id cid)
     buffer_append(pid, r2->ptr, r2->len);
 }
 
+void buffer_append_float_string(id pid, const char *buf, float *max)
+{
+    struct buffer *raw;
+    const char *ptr = buf;
+    char * endptr;
+    float f;
+
+    if (max) *max = 0;
+
+    buffer_fetch(pid, &raw);
+    assert(raw != NULL);
+
+next:
+    if(!ptr || !*ptr) goto end;
+
+    switch (*ptr) {
+    case '1': case '2': case '3':
+    case '4': case '5': case '6':
+    case '7': case '8': case '9':
+    case '0': case '+': case '-':
+        __realloc(raw, raw->len + sizeof(float));
+        f = (float)strtod(ptr, &endptr);
+        if (max) *max = MAX(f, *max);
+        memcpy(raw->ptr + raw->len, &f, sizeof(float));
+        raw->len += sizeof(float);
+        ptr = endptr;
+        goto next;
+    default:
+        ptr++;
+        goto next;
+    }
+
+end:
+    ;
+}
+
+void buffer_append_int_string(id pid, const char *buf, int *max)
+{
+    struct buffer *raw;
+    const char *ptr = buf;
+    char * endptr;
+    int d;
+
+    if (max) *max = 0;
+
+    buffer_fetch(pid, &raw);
+    assert(raw != NULL);
+
+next:
+    if(!ptr || !*ptr) goto end;
+
+    switch (*ptr) {
+    case '1': case '2': case '3':
+    case '4': case '5': case '6':
+    case '7': case '8': case '9':
+    case '0': case '+': case '-':
+        __realloc(raw, raw->len + sizeof(int));
+        d = strtol(ptr, &endptr, 10);
+        if (max) *max = MAX(d, *max);
+        memcpy(raw->ptr + raw->len, &d, sizeof(int));
+        raw->len += sizeof(int);
+        ptr = endptr;
+        goto next;
+    default:
+        ptr++;
+        goto next;
+    }
+
+end:
+    ;
+}
+
 void buffer_get_length(id pid, unsigned *len)
 {
     struct buffer *raw;
@@ -98,6 +190,15 @@ void buffer_get_length(id pid, unsigned *len)
     buffer_fetch(pid, &raw);
     assert(raw != NULL);
     *len = raw->len;
+}
+
+void buffer_get_length_with_stride(id pid, unsigned stride, unsigned *len)
+{
+    struct buffer *raw;
+
+    buffer_fetch(pid, &raw);
+    assert(raw != NULL);
+    *len = raw->len / stride;
 }
 
 void buffer_replace(id pid, const void *search, const unsigned slen, const void *replace, const unsigned rlen)
@@ -121,7 +222,7 @@ void buffer_replace(id pid, const void *search, const unsigned slen, const void 
                 if (slen == rlen) {
                     memcpy(raw->ptr + c, r, rlen);                 
                 } else if (slen < rlen) {
-                    raw->ptr = realloc(raw->ptr, raw->len + (rlen - slen) + 1);                    
+                    __realloc(raw, raw->len + (rlen - slen) + 1);                   
                     memmove(raw->ptr + c + rlen, raw->ptr + c + slen, raw->len - c - slen);                    
                     memcpy(raw->ptr + c, r, rlen);
                     raw->len += (rlen - slen);
