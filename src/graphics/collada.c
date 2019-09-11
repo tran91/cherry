@@ -1092,3 +1092,77 @@ void collada_context_load_file(id pid, const char *path)
     __parse_library_animations(raw, root);
     release(root);
 }
+
+void collada_context_get_node(id pid, const char *name, id *nid)
+{
+    struct collada_context *rctx;
+
+    collada_context_fetch(pid, &rctx);
+    assert(rctx != NULL);
+
+    map_get(rctx->nodes, key_chars(name), nid);
+}
+
+void collada_node_get_vertice(id pid, const float **ptr, unsigned *len)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    buffer_get_ptr(rn->vertices, ptr);
+    buffer_get_length(rn->vertices, len);
+}
+
+void collada_node_get_normals(id pid, const float **ptr, unsigned *len)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    buffer_get_ptr(rn->normals, ptr);
+    buffer_get_length(rn->normals, len);
+}
+
+void collada_node_get_texcoords(id pid, const float **ptr, unsigned *len)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    if (id_validate(rn->texcoords)) {
+        buffer_get_ptr(rn->texcoords, ptr);
+        buffer_get_length(rn->texcoords, len);
+    } else {
+        *ptr = NULL;
+        *len = 0;
+    }
+}
+
+void collada_node_get_colors(id pid, const float **ptr, unsigned *len)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    if (id_validate(rn->colors)) {
+        buffer_get_ptr(rn->colors, ptr);
+        buffer_get_length(rn->colors, len);
+    } else {
+        *ptr = NULL;
+        *len = 0;
+    }
+}
+
+void collada_node_get_transform(id pid, id *mid)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    *mid = rn->transform;
+}

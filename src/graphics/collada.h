@@ -10,6 +10,86 @@ type(collada_skin);
 type(collada_amature);
 type(collada_bone);
 
+/*
+ * @pid: collada_context
+ * 
+ * example:
+ *      id ctx;
+ *      collada_context_new(&ctx);
+ *      collada_context_load_file(ctx, "inner://res/model/cube.dae");
+ */
 void collada_context_load_file(id pid, const char *path);
+
+/*
+ * @pid: collada_context
+ * @nid: collada_node
+ * 
+ * example:
+ *      id ctx;
+ *      id node;
+ * 
+ *      collada_context_get_node(ctx, "Cube", &node);
+ */
+void collada_context_get_node(id pid, const char *name, id *nid);
+
+/*
+ * @pid: collada_node
+ *
+ * example:
+ *      id node;
+ *      const char *fptr;
+ *      unsigned flen;
+ * 
+ *      collada_node_get_vertice(node, &fptr, &flen);
+ */
+void collada_node_get_vertice(id pid, const float **ptr, unsigned *len);
+
+/*
+ * @pid: collada_node
+ *
+ * example:
+ *      id node;
+ *      const char *fptr;
+ *      unsigned flen;
+ * 
+ *      collada_node_get_normals(node, &fptr, &flen);
+ */
+void collada_node_get_normals(id pid, const float **ptr, unsigned *len);
+
+/*
+ * @pid: collada_node
+ * 
+ * example:
+ *      id node;
+ *      const char *fptr;
+ *      unsigned flen;
+ * 
+ *      collada_node_get_texcoords(node, &fptr, &flen);
+ */
+void collada_node_get_texcoords(id pid, const float **ptr, unsigned *len);
+
+/*
+ * @pid: collada_node
+ * 
+ * example:
+ *      id node;
+ *      const char *fptr;
+ *      unsigned flen;
+ * 
+ *      collada_node_get_colors(node, &fptr, &flen);
+ */
+void collada_node_get_colors(id pid, const float **ptr, unsigned *len);
+
+/*
+ * @pid: collada_node
+ * @nid: mat4
+ * 
+ * example:
+ *      id node;
+ *      id m;
+ *      
+ *      collada_node_get_transform(node, &m);
+ */
+void collada_node_get_transform(id pid, id *mid);
 
 #endif
