@@ -1092,13 +1092,3 @@ void collada_context_load_file(id pid, const char *path)
     __parse_library_animations(raw, root);
     release(root);
 }
-
-void dump()
-{
-    id test;
-    collada_mesh_fetch(test, NULL);
-    collada_skin_fetch(test, NULL);
-    collada_bone_fetch(test, NULL);
-    collada_amature_fetch(test, NULL);
-    collada_node_fetch(test, NULL);
-}
