@@ -1111,7 +1111,7 @@ void collada_node_get_vertice(id pid, const float **ptr, unsigned *len)
     assert(rn != NULL);
 
     buffer_get_ptr(rn->vertices, ptr);
-    buffer_get_length(rn->vertices, len);
+    buffer_get_length_with_stride(rn->vertices, sizeof(float), len);
 }
 
 void collada_node_get_normals(id pid, const float **ptr, unsigned *len)
@@ -1122,7 +1122,7 @@ void collada_node_get_normals(id pid, const float **ptr, unsigned *len)
     assert(rn != NULL);
 
     buffer_get_ptr(rn->normals, ptr);
-    buffer_get_length(rn->normals, len);
+    buffer_get_length_with_stride(rn->normals, sizeof(float), len);
 }
 
 void collada_node_get_texcoords(id pid, const float **ptr, unsigned *len)
@@ -1134,7 +1134,7 @@ void collada_node_get_texcoords(id pid, const float **ptr, unsigned *len)
 
     if (id_validate(rn->texcoords)) {
         buffer_get_ptr(rn->texcoords, ptr);
-        buffer_get_length(rn->texcoords, len);
+        buffer_get_length_with_stride(rn->texcoords, sizeof(float), len);
     } else {
         *ptr = NULL;
         *len = 0;
@@ -1150,7 +1150,7 @@ void collada_node_get_colors(id pid, const float **ptr, unsigned *len)
 
     if (id_validate(rn->colors)) {
         buffer_get_ptr(rn->colors, ptr);
-        buffer_get_length(rn->colors, len);
+        buffer_get_length_with_stride(rn->colors, sizeof(float), len);
     } else {
         *ptr = NULL;
         *len = 0;
@@ -1165,4 +1165,66 @@ void collada_node_get_transform(id pid, id *mid)
     assert(rn != NULL);
 
     *mid = rn->transform;
+}
+
+void collada_node_get_bones_id(id pid, const float **ptr, unsigned *len)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    if (id_validate(rn->bones_id)) {
+        buffer_get_ptr(rn->bones_id, ptr);
+        buffer_get_length_with_stride(rn->bones_id, sizeof(float), len);
+    } else {
+        *ptr = NULL;
+        *len = 0;
+    }
+}
+
+void collada_node_get_weights(id pid, const float **ptr, unsigned *len)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    if (id_validate(rn->weights)) {
+        buffer_get_ptr(rn->weights, ptr);
+        buffer_get_length_with_stride(rn->weights, sizeof(float), len);
+    } else {
+        *ptr = NULL;
+        *len = 0;
+    }
+}
+
+void collada_node_get_bones_per_vertex(id pid, unsigned *v)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    *v = rn->bones_per_vertex;
+}
+
+void collada_node_get_bones_upload(id pid, unsigned *v)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    *v = rn->bones_upload;
+}
+
+void collada_node_get_inverse_bind_poses(id pid, id *vid)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    *vid = rn->inverse_bind_poses;
 }

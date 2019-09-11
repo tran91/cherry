@@ -92,4 +92,30 @@ void collada_node_get_colors(id pid, const float **ptr, unsigned *len);
  */
 void collada_node_get_transform(id pid, id *mid);
 
+/*
+ * @pid: collada_node
+ */
+void collada_node_get_bones_id(id pid, const float **ptr, unsigned *len);
+
+/*
+ * @pid: collada_node
+ */
+void collada_node_get_weights(id pid, const float **ptr, unsigned *len);
+
+/*
+ * @pid: collada_node
+ */
+void collada_node_get_bones_per_vertex(id pid, unsigned *v);
+
+/*
+ * @pid: collada_node
+ */
+void collada_node_get_bones_upload(id pid, unsigned *v);
+
+/*
+ * @pid: collada_node
+ * @vid: vector
+ */
+void collada_node_get_inverse_bind_poses(id pid, id *vid);
+
 #endif

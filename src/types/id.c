@@ -163,3 +163,18 @@ void fetch(id pid, unsigned type, void *pt)
         *p = d + 1;
     }
 }
+
+void which(id pid, signed *type)
+{
+    struct data *d;
+    if (pid.index < 0 || pid.index >= __created__.len || pid.mask != __created__.mask[pid.index]) {
+        *type = -1;
+        return;
+    }
+    d = __created__.dt[pid.index];
+    if (!d) {
+        *type = -1;
+    } else {
+        *type = d->type;
+    }
+}

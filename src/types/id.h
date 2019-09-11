@@ -68,6 +68,7 @@ typedef struct key
 void invalidate(id *pid);
 void require(void(*init)(void*, key), void(*clear)(void*), unsigned size, signed *type);
 void create(unsigned type, id *pid);
+void which(id pid, signed *type);
 void build(id pid, key k);
 void retain(id pid);
 void release(id pid);
