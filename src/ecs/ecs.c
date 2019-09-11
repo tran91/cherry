@@ -46,6 +46,7 @@ void ecs_context_add_component(id ctx, unsigned entity, id cid)
     if (!id_validate(eid)) return;
 
     ecs_entity_fetch(eid, &re);
+    
 }
 
 void dump()
