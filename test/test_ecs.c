@@ -161,6 +161,7 @@ int main(int argc, char **argv)
     ecs_context_new_signal(ctx, &s);
     event_play_request(ctx, s, &ev);
     ecs_context_broadcast_signal(ctx, s);
+    ecs_context_broadcast_signal(ctx, s);
 
     /* release context */
     release(ctx);

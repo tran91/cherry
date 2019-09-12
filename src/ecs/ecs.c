@@ -317,6 +317,9 @@ void ecs_context_broadcast_signal(id ctx, unsigned signal)
     ecs_context_fetch(ctx, &rctx);
     assert(rctx != NULL);
 
+    vector_get(rctx->signals.indexes, signal, &s);
+    if (!id_validate(s)) return;
+
     index = 0;
     map_iterate(rctx->systems, index, &k, &s);
     while (id_validate(s)) {
