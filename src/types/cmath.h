@@ -100,6 +100,7 @@ type(mat4);
 void mat4_load_string(id pid, const char *ptr);
 void mat4_set_identity(id pid);
 void mat4_set_array(id pid, const float f[16]);
+void mat4_set_mat4(id pid, id cid);
 void mat4_inverse(id pid);
 void mat4_transpose(id pid);
 void mat4_set_perspective(id pid, float fov, float aspect, float near, float far);

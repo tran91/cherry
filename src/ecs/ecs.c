@@ -33,7 +33,7 @@ static void ecs_context_clear(struct ecs_context *p)
     release(p->entities);
 }
 
-void ecs_context_add_component(id ctx, unsigned entity, id cid)
+void ecs_context_get_component(id ctx, unsigned entity, signed type, id *cid)
 {
     struct ecs_context *rctx;
     struct ecs_entity *re;
@@ -46,11 +46,38 @@ void ecs_context_add_component(id ctx, unsigned entity, id cid)
     if (!id_validate(eid)) return;
 
     ecs_entity_fetch(eid, &re);
-    
+    map_get(re->components, key_mem(&type, sizeof(type)), cid);
 }
 
-void dump()
+void ecs_context_add_component(id ctx, unsigned entity, id cid)
 {
-    ecs_context_fetch(id_null, NULL);
-    ecs_entity_fetch(id_null, NULL);
+    struct ecs_context *rctx;
+    struct ecs_entity *re;
+    id eid;
+    signed tp;
+
+    ecs_context_fetch(ctx, &rctx);
+    assert(rctx != NULL);
+
+    vector_get(rctx->entities, entity, &eid);
+    if (!id_validate(eid)) return;
+
+    ecs_entity_fetch(eid, &re);
+    which(cid, &tp);
+    map_set(re->components, key_mem(&tp, sizeof(tp)), cid);
+}
+
+void ecs_context_new_entity(id ctx, unsigned *entity)
+{
+    struct ecs_context *rctx;
+    id eid;
+
+    ecs_context_fetch(ctx, &rctx);
+    assert(rctx != NULL);
+
+    vector_get_size(rctx->entities, entity);
+
+    ecs_entity_new(&eid);
+    vector_push(rctx->entities, eid);
+    release(eid);
 }

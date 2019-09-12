@@ -88,9 +88,9 @@ void collada_node_get_colors(id pid, const float **ptr, unsigned *len);
  *      id node;
  *      id m;
  *      
- *      collada_node_get_transform(node, &m);
+ *      collada_node_get_transform(node, m);
  */
-void collada_node_get_transform(id pid, id *mid);
+void collada_node_get_transform(id pid, id mid);
 
 /*
  * @pid: collada_node

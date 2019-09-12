@@ -54,7 +54,16 @@ typedef struct key
     };
 } key;
 
-#define key_mem(p, l) (key){.type = KEY_LITERAL, .ptr = p, .len = l} 
+static inline key key_mem(const void *p, size_t len)
+{
+    return (key){
+        .type = KEY_LITERAL,
+        .ptr = p,
+        .len = len
+    };
+}
+
+// #define key_mem(p, l) (key){.type = KEY_LITERAL, .ptr = p, .len = l} 
 #define key_chars(p) (key){.type = KEY_LITERAL, .ptr = p, .len = strlen(p)} 
 #define key_literal(p) (key){.type = KEY_LITERAL, .ptr = p, .len = sizeof(p) - 1}
 #define key_id(p) (key){.type = KEY_ID, .kid = p}

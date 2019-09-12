@@ -92,6 +92,17 @@ void mat4_set_array(id pid, const float f[16])
     memcpy(raw->m, f, sizeof(float[16]));
 }
 
+void mat4_set_mat4(id pid, id cid)
+{
+    struct mat4 *r1, *r2;
+
+    mat4_fetch(pid, &r1);
+    mat4_fetch(cid, &r2);
+    assert(r1 != NULL && r2 != NULL);
+
+    memcpy(r1->m, r2->m, sizeof(float[16]));
+}
+
 void mat4_inverse(id pid)
 {
     struct mat4 *raw;

@@ -1157,14 +1157,14 @@ void collada_node_get_colors(id pid, const float **ptr, unsigned *len)
     }
 }
 
-void collada_node_get_transform(id pid, id *mid)
+void collada_node_get_transform(id pid, id mid)
 {
     struct collada_node *rn;
 
     collada_node_fetch(pid, &rn);
     assert(rn != NULL);
 
-    *mid = rn->transform;
+    mat4_set_mat4(mid, rn->transform);
 }
 
 void collada_node_get_bones_id(id pid, const float **ptr, unsigned *len)
