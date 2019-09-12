@@ -1,5 +1,6 @@
 #include "ecs.h"
 #include "types/vector.h"
+#include "types/buffer.h"
 
 /*
  * entity internal
@@ -49,6 +50,7 @@ static void ecs_system_clear(struct ecs_system *p)
 struct ecs_context
 {
     id entities;
+    id recycles;
     id systems;
 };
 make_type(ecs_context);
@@ -56,12 +58,14 @@ make_type(ecs_context);
 static void ecs_context_init(struct ecs_context *p, key k)
 {
     vector_new(&p->entities);
+    buffer_new(&p->recycles);
     map_new(&p->systems);
 }
 
 static void ecs_context_clear(struct ecs_context *p)
 {
     release(p->entities);
+    release(p->recycles);
     release(p->systems);
 }
 
@@ -138,21 +142,6 @@ void ecs_context_add_component(id ctx, unsigned entity, id cid)
     map_set(re->components, key_mem(&tp, sizeof(tp)), cid);
 }
 
-void ecs_context_new_entity(id ctx, unsigned *entity)
-{
-    struct ecs_context *rctx;
-    id eid;
-
-    ecs_context_fetch(ctx, &rctx);
-    assert(rctx != NULL);
-
-    vector_get_size(rctx->entities, entity);
-
-    ecs_entity_new(&eid);
-    vector_push(rctx->entities, eid);
-    release(eid);
-}
-
 void ecs_context_check_entity(id ctx, unsigned entity)
 {
     struct ecs_context *rctx;
@@ -171,6 +160,55 @@ void ecs_context_check_entity(id ctx, unsigned entity)
         rs->check(ctx, rs->sid, entity);
         index++;
         map_iterate(rctx->systems, index, &k, &s);
+    }
+}
+
+void ecs_context_new_entity(id ctx, unsigned *entity)
+{
+    struct ecs_context *rctx;
+    id eid;
+    unsigned len;
+
+    ecs_context_fetch(ctx, &rctx);
+    assert(rctx != NULL);
+
+    buffer_get_length_with_stride(rctx->recycles, sizeof(unsigned), &len);
+    if (len > 0) {
+        /* find recycled entity */
+        buffer_get_with_stride(rctx->recycles, sizeof(unsigned), len - 1, entity);
+        buffer_cut_with_stride(rctx->recycles, sizeof(unsigned), len - 1);
+        ecs_entity_new(&eid);
+        vector_set(rctx->entities, *entity, eid);
+        release(eid);
+    } else {
+        /* append new entity */
+        vector_get_size(rctx->entities, entity);
+        ecs_entity_new(&eid);
+        vector_push(rctx->entities, eid);
+        release(eid);
+    }
+}
+
+void ecs_context_remove_entity(id ctx, unsigned entity)
+{
+    struct ecs_context *rctx;
+    struct ecs_entity *re;
+    id eid;
+    unsigned len;
+
+    ecs_context_fetch(ctx, &rctx);
+    assert(rctx != NULL);
+
+    vector_get_size(rctx->entities, &len);
+    if (len <= entity) return;
+
+    vector_get(rctx->entities, entity, &eid);
+    if (id_validate(eid)) {
+        ecs_entity_fetch(eid, &re);
+        map_remove_all(re->components);
+        ecs_context_check_entity(ctx, entity);
+        vector_set(rctx->entities, entity, id_null);
+        buffer_append(rctx->recycles, &entity, sizeof(entity));
     }
 }
 

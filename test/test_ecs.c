@@ -1,7 +1,7 @@
 #include "ecs/ecs.h"
 #include "types/cmath.h"
 
-/* component transform */
+/* sample component */
 struct component_drawable
 {
     const char *name;
@@ -17,7 +17,7 @@ static void component_drawable_clear(struct component_drawable *p)
 {
 }
 
-/* system */
+/* sample system */
 struct system_render
 {
     id sym;
@@ -78,13 +78,12 @@ static void system_render_update(id ctx, id sys, float delta)
 
         component_drawable_find(ctx, entity, &comp);
         component_drawable_fetch(comp, &rcomp);
-        debug("%s\n", rcomp->name);
+        debug("%s: %u\n", rcomp->name, entity);
 
         index++;
         map_iterate(rsys->drawables, index, &k, &obj);
     }
 }
-
 
 int main(int argc, char **argv)
 {
@@ -100,12 +99,26 @@ int main(int argc, char **argv)
     system_render_register(ctx);
 
     /* create new entity and assign some components */
+    debug("\n---------------------------------------------\n");
+    debug("             create 10 entities\n");
+    debug("---------------------------------------------\n");
     for (i = 0; i < 10; ++i) {
         ecs_context_new_entity(ctx, &e);
         component_drawable_request(ctx, e, &cp);
     }
+    ecs_context_update(ctx, 1.0f / 60);
 
-    /* update context one time */
+    debug("\n---------------------------------------------\n");
+    debug("          remove entity at index 4\n");
+    debug("---------------------------------------------\n");
+    ecs_context_remove_entity(ctx, 4);
+    ecs_context_update(ctx, 1.0f / 60);
+
+    debug("\n---------------------------------------------\n");
+    debug("              create 1 entity\n");
+    debug("---------------------------------------------\n");
+    ecs_context_new_entity(ctx, &e);
+    component_drawable_request(ctx, e, &cp);
     ecs_context_update(ctx, 1.0f / 60);
 
     /* release context */

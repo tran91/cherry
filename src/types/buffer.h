@@ -40,6 +40,9 @@ void buffer_reserve(id pid, unsigned len);
 void buffer_get_length(id pid, unsigned *len);
 void buffer_get_length_with_stride(id pid, unsigned stride, unsigned *len);
 
+void buffer_cut_with_stride(id pid, unsigned stride, unsigned index);
+void buffer_get_with_stride(id pid, unsigned stride, unsigned index, void *mem);
+
 /*
  * @pid: buffer
  */

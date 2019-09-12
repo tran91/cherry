@@ -201,6 +201,37 @@ void buffer_get_length_with_stride(id pid, unsigned stride, unsigned *len)
     *len = raw->len / stride;
 }
 
+void buffer_cut_with_stride(id pid, unsigned stride, unsigned index)
+{
+    struct buffer *raw;
+    unsigned slen;
+
+    buffer_fetch(pid, &raw);
+    assert(raw != NULL && stride > 0);
+    slen = raw->len / stride;
+
+    if (slen <= index) return;    
+
+    if (index < slen - 1) {
+        memmove((char *)raw->ptr + index * stride, (char *)raw->ptr + (index + 1) * stride, stride * (slen - index - 1));
+    }
+    raw->len -= stride;
+}
+
+void buffer_get_with_stride(id pid, unsigned stride, unsigned index, void *mem)
+{
+    struct buffer *raw;
+    unsigned slen;
+
+    buffer_fetch(pid, &raw);
+    assert(raw != NULL && stride > 0);
+    slen = raw->len / stride;
+
+    if (slen <= index) return;
+
+    memcpy(mem, (char *)raw->ptr + index * stride, stride);
+}
+
 void buffer_replace(id pid, const void *search, const unsigned slen, const void *replace, const unsigned rlen)
 {
     struct buffer *raw;

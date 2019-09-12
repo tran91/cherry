@@ -6,6 +6,7 @@
 type(ecs_context);
 void ecs_context_new_entity(id ctx, unsigned *entity);
 void ecs_context_update(id ctx, float delta);
+void ecs_context_remove_entity(id ctx, unsigned entity);
 
 /*
  * system
