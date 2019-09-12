@@ -28,7 +28,7 @@ static void remove_connection(id server, id sock)
 /*
  * client side
  */
-static void cresponse(id client, id response)
+static void cresponse(id user, id response)
 {
     const char *str;
 
@@ -36,7 +36,7 @@ static void cresponse(id client, id response)
     debug("received: %s\n", str);
 }
 
-static void cerror(id client)
+static void cerror(id user)
 {
     debug("error\n");
 }

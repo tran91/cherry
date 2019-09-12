@@ -34,6 +34,8 @@ bash make_linux.sh
 ./build/linux/Debug/test_graphic
 ./build/linux/Debug/test_https server
 ./build/linux/Debug/test_https client
+./build/linux/Debug/test_collada
+./build/linux/Debug/test_ecs
 ```
 
 ## Model

@@ -1,6 +1,9 @@
 #include "ecs.h"
 #include "types/vector.h"
 
+/*
+ * entity internal
+ */
 struct ecs_entity
 {
     id components;
@@ -17,20 +20,88 @@ static void ecs_entity_clear(struct ecs_entity *p)
     release(p->components);
 }
 
+/*
+ * system_internal
+ */
+struct ecs_system
+{
+    id sid;
+    void(*update)(id, id, float);
+    void(*check)(id, id, unsigned);
+};
+make_type(ecs_system);
+
+static void ecs_system_init(struct ecs_system *p, key k)
+{
+    p->sid = id_null;
+    p->update = NULL;
+    p->check = NULL;
+}
+
+static void ecs_system_clear(struct ecs_system *p)
+{
+    release(p->sid);
+}
+
+/*
+ * context
+ */
 struct ecs_context
 {
     id entities;
+    id systems;
 };
 make_type(ecs_context);
 
 static void ecs_context_init(struct ecs_context *p, key k)
 {
     vector_new(&p->entities);
+    map_new(&p->systems);
 }
 
 static void ecs_context_clear(struct ecs_context *p)
 {
     release(p->entities);
+    release(p->systems);
+}
+
+void ecs_context_get_system(id ctx, signed type, id *sid)
+{
+    struct ecs_context *rctx;
+    struct ecs_system *rs;
+    id s;
+
+    ecs_context_fetch(ctx, &rctx);
+    assert(rctx != NULL);
+
+    map_get(rctx->systems, key_mem(&type, sizeof(type)), &s);
+    ecs_system_fetch(s, &rs);
+    if (rs) {
+        *sid = rs->sid;
+    } else {
+        invalidate(sid);
+    }
+}
+
+void ecs_context_add_system(id ctx, id sid, void(*update)(id, id, float), void(*check)(id, id, unsigned))
+{
+    struct ecs_context *rctx;
+    signed tp;
+    struct ecs_system *rs;
+    id s;
+
+    ecs_context_fetch(ctx, &rctx);
+    assert(rctx != NULL);
+
+    ecs_system_new(&s);
+    ecs_system_fetch(s, &rs);
+    assign(rs->sid, sid);
+    rs->update = update;
+    rs->check = check;
+
+    which(sid, &tp);
+    map_set(rctx->systems, key_mem(&tp, sizeof(tp)), s);
+    release(s);
 }
 
 void ecs_context_get_component(id ctx, unsigned entity, signed type, id *cid)
@@ -80,4 +151,46 @@ void ecs_context_new_entity(id ctx, unsigned *entity)
     ecs_entity_new(&eid);
     vector_push(rctx->entities, eid);
     release(eid);
+}
+
+void ecs_context_check_entity(id ctx, unsigned entity)
+{
+    struct ecs_context *rctx;
+    struct ecs_system *rs;
+    unsigned index;
+    id s;
+    key k;
+
+    ecs_context_fetch(ctx, &rctx);
+    assert(rctx != NULL);
+
+    index = 0;
+    map_iterate(rctx->systems, index, &k, &s);
+    while (id_validate(s)) {
+        ecs_system_fetch(s, &rs);
+        rs->check(ctx, rs->sid, entity);
+        index++;
+        map_iterate(rctx->systems, index, &k, &s);
+    }
+}
+
+void ecs_context_update(id ctx, float delta)
+{
+    struct ecs_context *rctx;
+    struct ecs_system *rs;
+    unsigned index;
+    id s;
+    key k;
+
+    ecs_context_fetch(ctx, &rctx);
+    assert(rctx != NULL);
+
+    index = 0;
+    map_iterate(rctx->systems, index, &k, &s);
+    while (id_validate(s)) {
+        ecs_system_fetch(s, &rs);
+        rs->update(ctx, rs->sid, delta);
+        index++;
+        map_iterate(rctx->systems, index, &k, &s);
+    }
 }

@@ -178,3 +178,15 @@ void which(id pid, signed *type)
         *type = d->type;
     }
 }
+
+/*
+ * empty
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function" /* empty_fetch is going not to be called */
+struct empty {};
+make_type(empty);
+static void empty_init(struct empty *p, key k){}
+static void empty_clear(struct empty *p){}
+#pragma GCC diagnostic pop
+

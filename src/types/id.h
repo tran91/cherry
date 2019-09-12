@@ -63,7 +63,6 @@ static inline key key_mem(const void *p, size_t len)
     };
 }
 
-// #define key_mem(p, l) (key){.type = KEY_LITERAL, .ptr = p, .len = l} 
 #define key_chars(p) (key){.type = KEY_LITERAL, .ptr = p, .len = strlen(p)} 
 #define key_literal(p) (key){.type = KEY_LITERAL, .ptr = p, .len = sizeof(p) - 1}
 #define key_id(p) (key){.type = KEY_ID, .kid = p}
@@ -147,6 +146,8 @@ void name##_new(id *pid)\
     create(name##_type, pid);\
     build(*pid, key_null);\
 }
+
+type(empty);
 
 /* platform */
 #define UNKNOWN 0
