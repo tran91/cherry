@@ -8,6 +8,48 @@ void ecs_context_new_entity(id ctx, unsigned *entity);
 void ecs_context_update(id ctx, float delta);
 void ecs_context_remove_entity(id ctx, unsigned entity);
 
+void ecs_context_new_signal(id ctx, unsigned *signal);
+void ecs_context_broadcast_signal(id ctx, unsigned signal);
+
+/*
+ * event
+ */
+#define ecs_event(name) \
+    struct name;\
+    void name##_find(id ctx, unsigned signal, id *pid);\
+    void name##_request(id ctx, unsigned signal, id *pid);
+
+#define make_ecs_event(name) \
+static signed name##_type = -1;\
+struct name;\
+static void name##_init(struct name *s, key k);\
+static void name##_clear(struct name *s);\
+static void name##_fetch(id pid, struct name **ptr)\
+{\
+    void fetch(id pid, unsigned type, void *p);\
+    fetch(pid, (unsigned)name##_type, ptr);\
+}\
+void name##_find(id ctx, unsigned signal, id *pid)\
+{\
+    void ecs_context_get_event(id ctx, unsigned signal, signed type, id *cid);\
+    require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
+    ecs_context_get_event(ctx, signal, name##_type, pid);\
+}\
+void name##_request(id ctx, unsigned signal, id *pid)\
+{\
+    void ecs_context_add_event(id ctx, unsigned signal, id cid);\
+    void ecs_context_get_event(id ctx, unsigned signal, signed type, id *cid);\
+    require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
+    ecs_context_get_event(ctx, signal, name##_type, pid);\
+    if (!id_validate(*pid)) {\
+        create(name##_type, pid);\
+        build(*pid, key_null);\
+        ecs_context_add_event(ctx, signal, *pid);\
+        release(*pid);\
+    }\
+}
+
+
 /*
  * system
  */
@@ -21,6 +63,7 @@ void ecs_context_remove_entity(id ctx, unsigned entity);
     static void name##_clear(struct name *s);\
     static void name##_update(id ctx, id sys, float delta);\
     static void name##_check(id ctx, id sys, unsigned entity);\
+    static void name##_listen(id ctx, id sys, unsigned signal);\
     static void name##_fetch(id pid, struct name **ptr)\
     {\
         void fetch(id pid, unsigned type, void *p);\
@@ -28,7 +71,7 @@ void ecs_context_remove_entity(id ctx, unsigned entity);
     }\
     void name##_register(id ctx)\
     {\
-        void ecs_context_add_system(id ctx, id sid, void(*update)(id, id, float), void(*check)(id, id, unsigned));\
+        void ecs_context_add_system(id ctx, id sid, void(*update)(id, id, float), void(*check)(id, id, unsigned), void(*listen)(id, id, unsigned));\
         void ecs_context_get_system(id ctx, signed type, id *sid);\
         require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
         id sid;\
@@ -36,7 +79,7 @@ void ecs_context_remove_entity(id ctx, unsigned entity);
         if (!id_validate(sid)) {\
             create(name##_type, &sid);\
             build(sid, key_null);\
-            ecs_context_add_system(ctx, sid, name##_update, name##_check);\
+            ecs_context_add_system(ctx, sid, name##_update, name##_check, name##_listen);\
             release(sid);\
         }\
     }

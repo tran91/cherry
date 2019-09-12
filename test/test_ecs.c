@@ -1,6 +1,23 @@
 #include "ecs/ecs.h"
 #include "types/cmath.h"
 
+/* sample event */
+struct event_play
+{
+    const char *name;
+};
+make_ecs_event(event_play);
+
+static void event_play_init(struct event_play *p, key k)
+{
+    p->name = "listen to me";
+}
+
+static void event_play_clear(struct event_play *p)
+{
+
+}
+
 /* sample component */
 struct component_drawable
 {
@@ -59,6 +76,22 @@ static void system_render_check(id ctx, id sys, unsigned entity)
     }
 }
 
+static void system_render_listen(id ctx, id sys, unsigned signal)
+{
+    id evt;
+    struct event_play *rep;
+    struct system_render *rsys;
+
+    system_render_fetch(sys, &rsys);
+    assert(rsys != NULL);
+
+    event_play_find(ctx, signal, &evt);
+    if (id_validate(evt)) {
+        event_play_fetch(evt, &rep);
+        debug("%s: %u\n", rep->name, signal);
+    }
+}
+
 static void system_render_update(id ctx, id sys, float delta)
 {
     struct system_render *rsys;
@@ -88,8 +121,8 @@ static void system_render_update(id ctx, id sys, float delta)
 int main(int argc, char **argv)
 {
     id ctx;
-    id cp;
-    unsigned e;
+    id cp, ev;
+    unsigned e, s;
     int i;
 
     /* create context */
@@ -120,6 +153,14 @@ int main(int argc, char **argv)
     ecs_context_new_entity(ctx, &e);
     component_drawable_request(ctx, e, &cp);
     ecs_context_update(ctx, 1.0f / 60);
+
+    /* send some events */
+    debug("\n---------------------------------------------\n");
+    debug("         add 1 signal with event_play\n");
+    debug("---------------------------------------------\n");
+    ecs_context_new_signal(ctx, &s);
+    event_play_request(ctx, s, &ev);
+    ecs_context_broadcast_signal(ctx, s);
 
     /* release context */
     release(ctx);
