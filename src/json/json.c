@@ -131,6 +131,16 @@ void json_object_add(id pid, const char *name, id element)
     map_set(rje->any, key_chars(name), element);
 }
 
+void json_object_get(id pid, const char *name, id *eid)
+{
+    struct json_element *rje;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL && rje->type == JSON_OBJECT);
+
+    map_get(rje->any, key_chars(name), eid);
+}
+
 void json_object_remove(id pid, const char *name)
 {
     struct json_element *rje;
@@ -153,6 +163,16 @@ void json_array_add(id pid, id element)
     assert(rje != NULL && rje->type == JSON_ARRAY);
 
     vector_push(rje->any, element);
+}
+
+void json_array_get(id pid, unsigned index, id *eid)
+{
+    struct json_element *rje;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL && rje->type == JSON_ARRAY);
+
+    vector_get(rje->any, index, eid);
 }
 
 void json_array_remove(id pid, unsigned index)

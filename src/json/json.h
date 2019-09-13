@@ -19,9 +19,11 @@ void json_element_make_null(id pid);
 void json_element_dump(id pid);
 
 void json_object_add(id pid, const char *name, id element);
+void json_object_get(id pid, const char *name, id *eid);
 void json_object_remove(id pid, const char *name);
 
 void json_array_add(id pid, id element);
+void json_array_get(id pid, unsigned index, id *eid);
 void json_array_remove(id pid, unsigned index);
 
 void json_string_append(id pid, const char *ptr);
