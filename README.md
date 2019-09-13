@@ -31,6 +31,7 @@ bash make_linux.sh
 
 #try one of these testings
 ./build/linux/Debug/test_xml
+./build/linux/Debug/test_json
 ./build/linux/Debug/test_graphic
 ./build/linux/Debug/test_https server
 ./build/linux/Debug/test_https client
