@@ -4,6 +4,7 @@
         "vga_attribute.h": "c",
         "opengl.h": "c",
         "gl.h": "c",
-        "glext.h": "c"
+        "glext.h": "c",
+        "random": "c"
     }
 }

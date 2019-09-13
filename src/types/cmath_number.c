@@ -109,3 +109,13 @@ void number_set(id pid, double n)
     assert(r1 != NULL);
     r1->num = n;
 }
+
+void number_get(id pid, double *n)
+{
+    struct number *r1;
+
+    number_fetch(pid, &r1);
+    assert(r1 != NULL);
+
+    *n = r1->num;
+}

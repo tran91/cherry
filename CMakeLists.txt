@@ -135,6 +135,10 @@ if (USE_OPENGL)
 		add_dependencies(test_xml cherry ${OPENGL_APPLICATION})
 		target_link_libraries(test_xml cherry ${OPENGL_APPLICATION})
 
+		add_executable(test_json "test/test_json.c")
+		add_dependencies(test_json cherry ${OPENGL_APPLICATION})
+		target_link_libraries(test_json cherry ${OPENGL_APPLICATION})
+
 		add_executable(test_collada "test/test_collada.c")
 		add_dependencies(test_collada cherry ${OPENGL_APPLICATION})
 		target_link_libraries(test_collada cherry ${OPENGL_APPLICATION})

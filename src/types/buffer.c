@@ -39,7 +39,8 @@ static void load_file(struct buffer *p, const char *path)
 
 static void buffer_init(struct buffer *p, key k)
 {
-    p->ptr = NULL;
+    p->ptr = malloc(1);
+    p->ptr[0] = '\0';
     p->len = 0;
     p->reserved = 0;
 
