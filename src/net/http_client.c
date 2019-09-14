@@ -4,6 +4,8 @@
 #include "types/bind.h"
 #include "types/buffer.h"
 
+#if OS != WEB
+
 struct http_client {
     id tid;
 };
@@ -160,3 +162,5 @@ void http_client_get(id pid, const char *link, id cid, http_client_callback cb)
     release(buf);
     release(job);
 }
+
+#endif

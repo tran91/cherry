@@ -1,4 +1,4 @@
-#ifdef BUILD_OPENGL
+#ifdef BUILD_OPENGL_2
 
 #include "vga.h"
 #include "image.h"
@@ -9,9 +9,28 @@
 
 #if OS == IOS
     #define GL_GLEXT_PROTOTYPES
-    #include <OpenGLES/ES3/gl.h>
-    #include <OpenGLES/ES3/glext.h>
-    //#define GL_MAX_SAMPLES GL_MAX_SAMPLES_APPLE
+    #include <OpenGLES/ES2/gl.h>
+    #include <OpenGLES/ES2/glext.h>
+
+    #define glGenVertexArrays               glGenVertexArraysOES
+    #define glBindVertexArray               glBindVertexArrayOES
+    #define glDeleteVertexArrays            glDeleteVertexArraysOES
+
+    #define glMapBuffer                     glMapBufferOES
+    #define glUnmapBuffer                   glUnmapBufferOES
+    #define glMapBufferRange                glMapBufferRangeEXT
+
+    #define GL_MAP_WRITE_BIT                GL_MAP_WRITE_BIT_EXT
+    #define GL_MAP_READ_BIT                 GL_MAP_READ_BIT_EXT
+    #define GL_MAP_INVALIDATE_RANGE_BIT     GL_MAP_INVALIDATE_RANGE_BIT_EXT
+    #define GL_MAP_INVALIDATE_BUFFER_BIT    GL_MAP_INVALIDATE_BUFFER_BIT_EXT
+    #define GL_MAP_FLUSH_EXPLICIT_BIT       GL_MAP_FLUSH_EXPLICIT_BIT_EXT
+    #define GL_MAP_UNSYNCHRONIZED_BIT       GL_MAP_UNSYNCHRONIZED_BIT_EXT
+
+    #define glDrawArraysInstanced           glDrawArraysInstancedEXT
+    #define glVertexAttribDivisor           glVertexAttribDivisorEXT
+
+    #define glFramebufferTexture(a,b,c,d) glFramebufferTexture2D(a,b, GL_TEXTURE_2D, c,d)
 #elif OS == OSX
     #define __gl_h_
     #define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
@@ -20,18 +39,35 @@
 #elif OS == DROID
     #define GL_GLEXT_PROTOTYPES
     #include <EGL/egl.h>
-    #include <GLES3/gl3.h>
-    #include <GLES3/gl3ext.h>
+    #include <GLES2/gl2.h>
+    #include <GLES2/gl2ext.h>
+
+    #define glGenVertexArrays glGenVertexArraysOES
+    #define glBindVertexArray glBindVertexArrayOES
+    #define glDeleteVertexArrays glDeleteVertexArraysOES
+
+    #define glMapBuffer glMapBufferOES
+    #define glUnmapBuffer glUnmapBufferOES
+
+    #define glFramebufferTexture(a,b,c,d) glFramebufferTexture2D(a,b, GL_TEXTURE_2D, c,d)
 #elif OS == WEB
     #define GL_GLEXT_PROTOTYPES
     #include <GL/gl.h>
     #include <GL/glext.h>
+
+    #define GL_RGBA8_OES GL_RGBA8
+    #define GL_DEPTH24_STENCIL8_OES GL_DEPTH24_STENCIL8
+
+    #define glFramebufferTexture(a,b,c,d) glFramebufferTexture2D(a,b, GL_TEXTURE_2D, c,d)
 #elif OS == WINDOWS
     #include <GL/glew.h>
 #else
     #define GL_GLEXT_PROTOTYPES
     #include <GL/gl.h>
     #include <GL/glext.h>
+
+    #define GL_RGBA8_OES GL_RGBA8
+    #define GL_DEPTH24_STENCIL8_OES GL_DEPTH24_STENCIL8
 #endif
 
 const unsigned VGA_FLOAT = GL_FLOAT;
@@ -343,21 +379,18 @@ struct vga_framebuffer
     struct {
         unsigned glid;
         unsigned created;
-        id mtexs;
-        id vtexs;
+        id tex;
     } resolver;
 
     struct {
         unsigned glid;
         unsigned created;
-        id mrens;
-        id vrens;
+        id ren;
         unsigned samples;
         unsigned build_samples;
     } sampler;
 
-    id vnames;
-
+    unsigned has_tex;
     id depth_stencil;    
     char has_depth;
     char has_stencil;
@@ -369,17 +402,15 @@ static void vga_framebuffer_init(struct vga_framebuffer *p, key k)
 {
     p->resolver.glid = 0;
     p->resolver.created = 0;
-    map_new(&p->resolver.mtexs);
-    vector_new(&p->resolver.vtexs);
+    p->resolver.tex = id_null;
 
     p->sampler.glid = 0;
     p->sampler.created = 0;
-    map_new(&p->sampler.mrens);
-    vector_new(&p->sampler.vrens);
+    p->sampler.ren = id_null;
     p->sampler.samples = 0;
     p->sampler.build_samples = 0;
     
-    vector_new(&p->vnames);
+    p->has_tex = 0;
 
     p->width = 0;
     p->height = 0;
@@ -395,18 +426,18 @@ static void vga_framebuffer_clear(struct vga_framebuffer *p)
         glDeleteFramebuffers(1, &p->resolver.glid);
         p->resolver.created = 0;
     }
-    release(p->resolver.mtexs);
-    release(p->resolver.vtexs);
+    release(p->resolver.tex);
+    p->resolver.tex = id_null;
 
     if (p->sampler.created == 1) {
         glDeleteFramebuffers(1, &p->sampler.glid);
         p->sampler.created = 0;
     }
-    release(p->sampler.mrens);
-    release(p->sampler.vrens);
+    release(p->sampler.ren);
+    p->sampler.ren = id_null;
     p->sampler.samples = 0;
 
-    release(p->vnames);
+    p->has_tex = 0;
 
     p->width = 0;
     p->height = 0;
@@ -420,11 +451,6 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
 {
     struct vga_renderbuffer *vrb;
     struct vga_texture *vtx;
-    int i, flag;
-    id tex, name, ren;
-    unsigned len;
-    const char *ptr;
-    unsigned attachments[32] = {GL_NONE};
 
     if (p->width == 0 || p->height == 0) return;
 
@@ -442,8 +468,8 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
                 glDeleteFramebuffers(1, &p->sampler.glid);
                 p->sampler.created = 0;
             }
-            map_remove_all(p->sampler.mrens);
-            vector_remove_all(p->sampler.vrens);
+            release(p->sampler.ren);
+            p->sampler.ren = id_null;
             p->sampler.samples = 0;
         } else {
             if (p->sampler.created == 0) {
@@ -455,96 +481,54 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
     }
 
     /* check resolver textures */
-    flag = 0;
-    for (i = 0;;i++) {
-        vector_get(p->vnames, i, &name);
-        if (!id_validate(name)) break;
-
-        buffer_get_ptr(name, &ptr);
-        map_get(p->resolver.mtexs, key_chars(ptr), &tex);
-        if (id_validate(tex)) {
-            vga_texture_fetch(tex, &vtx);
+    if (p->has_tex) {
+        if (id_validate(p->resolver.tex)) {
+            vga_texture_fetch(p->resolver.tex, &vtx);
             if (vtx->width != p->width || vtx->height != p->height) {
-                vga_texture_load_raw(tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);                
+                vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);                
             }
         } else {
-            vga_texture_new(&tex);
-            vga_texture_load_raw(tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);
-            map_set(p->resolver.mtexs, key_chars(ptr), tex);
-            vector_push(p->resolver.vtexs, tex);
-            release(tex);
+            vga_texture_new(&p->resolver.tex);
+            vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);
 
-            vga_texture_fetch(tex, &vtx);
-            vector_get_size(p->resolver.vtexs, &len);
+            vga_texture_fetch(p->resolver.tex, &vtx);
             glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
             glBindTexture(GL_TEXTURE_2D, vtx->glid);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + len - 1, GL_TEXTURE_2D, vtx->glid, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, vtx->glid, 0);
             glBindTexture(GL_TEXTURE_2D, 0);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            flag = 1;
         }
-    }
-    if (flag) {
-        vector_get_size(p->resolver.vtexs, &len);
-        for (i = 0; i < len; ++i) {
-            attachments[i] = GL_COLOR_ATTACHMENT0 + i;
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
-        glDrawBuffers(len, attachments);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        flag = 0;
     }
 
     /* check sampler renderers */
-    flag = 0;
+    #if OS != WEB
     if (p->sampler.created > 0) {
-        for (i = 0;;i++) {
-            vector_get(p->vnames, i, &name);
-            if (!id_validate(name)) break;
-
-            buffer_get_ptr(name, &ptr);
-            map_get(p->sampler.mrens, key_chars(ptr), &ren);
-            if (id_validate(ren)) {
-                vga_renderbuffer_fetch(ren, &vrb);
-                if (vrb->width != p->width || vrb->height != p->height) {                    
-                    vrb->width = p->width;
-                    vrb->height = p->height;
-                    glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
-                    glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_RGBA8, p->width, p->height);
-                    glBindRenderbuffer(GL_RENDERBUFFER, 0);                          
-                }
-            } else {
-                vga_renderbuffer_new(&ren);
-                vga_renderbuffer_fetch(ren, &vrb);
+        if (id_validate(p->sampler.ren)) {
+            vga_renderbuffer_fetch(p->sampler.ren, &vrb);
+            if (vrb->width != p->width || vrb->height != p->height) {                    
                 vrb->width = p->width;
                 vrb->height = p->height;
-                glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
-                glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_RGBA8, p->width, p->height);
-                glBindRenderbuffer(GL_RENDERBUFFER, 0);  
-                map_set(p->sampler.mrens, key_chars(ptr), ren);
-                vector_push(p->sampler.vrens, ren);
-                release(ren);
+                glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);                    
+                glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_RGBA8_OES, p->width, p->height);
+                glBindRenderbuffer(GL_RENDERBUFFER, 0);                          
+            }
+        } else {
+            vga_renderbuffer_new(&p->sampler.ren);
+            vga_renderbuffer_fetch(p->sampler.ren, &vrb);
+            vrb->width = p->width;
+            vrb->height = p->height;
+            glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
+            glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_RGBA8_OES, p->width, p->height);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);  
 
-                vector_get_size(p->sampler.vrens, &len);
-                glBindFramebuffer(GL_FRAMEBUFFER, p->sampler.glid);
-                glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
-                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + len - 1, GL_RENDERBUFFER, vrb->glid);
-                glBindRenderbuffer(GL_RENDERBUFFER, 0);
-                glBindFramebuffer(GL_FRAMEBUFFER, 0);
-                flag = 1;
-            }
-        }
-        if (flag) {
-            vector_get_size(p->sampler.vrens, &len);
-            for (i = 0; i < len; ++i) {
-                attachments[i] = GL_COLOR_ATTACHMENT0 + i;
-            }
             glBindFramebuffer(GL_FRAMEBUFFER, p->sampler.glid);
-            glDrawBuffers(len, attachments);
+            glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, vrb->glid);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            flag = 0;
         }
     }
+    #endif
 
     /* build depth */
     if (p->depth_stencil_complete) return;
@@ -555,6 +539,7 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
             vga_renderbuffer_fetch(p->depth_stencil, &vrb);
         }
         if (p->sampler.created == 1) {
+            #if OS != WEB
             /* detach resolver depth buffer */
             glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
@@ -565,7 +550,7 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
             glBindFramebuffer(GL_FRAMEBUFFER, p->sampler.glid);
             glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
             if (vrb->width != p->width || vrb->height != p->height) {
-                glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_DEPTH24_STENCIL8, p->width, p->height);
+                glRenderbufferStorageMultisample(GL_RENDERBUFFER, p->sampler.samples, GL_DEPTH24_STENCIL8_OES, p->width, p->height);
                 vrb->width = p->width;
                 vrb->height = p->height;
             }            
@@ -580,12 +565,13 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
                 glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
             }
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            #endif
         } else {
             /* attach resolver depth buffer */
             glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
             glBindRenderbuffer(GL_RENDERBUFFER, vrb->glid);
             if (vrb->width != p->width || vrb->height != p->height) {
-                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, p->width, p->height);
+                glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, p->width, p->height);
                 vrb->width = p->width;
                 vrb->height = p->height;
             }            
@@ -656,27 +642,21 @@ void vga_framebuffer_set_multisampling(id pid, unsigned char samples)
     vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
+#if OS != WEB
     raw->sampler.build_samples = samples;
     vga_framebuffer_build(raw);
+#endif
 }
 
 void vga_framebuffer_add_texture(id pid, const char *name)
 {
     struct vga_framebuffer *raw;
-    id tmp;
 
     vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
-    map_get(raw->resolver.mtexs, key_chars(name), &tmp);
-    if (!id_validate(tmp)) {
-        buffer_new(&tmp);
-        buffer_append(tmp, name, strlen(name));
-        vector_push(raw->vnames, tmp);
-        release(tmp);
-
-        vga_framebuffer_build(raw);
-    }
+    raw->has_tex = 1;
+    vga_framebuffer_build(raw);
 }
 
 void vga_framebuffer_get_texture(id pid, const char *name, id *tex)
@@ -686,7 +666,7 @@ void vga_framebuffer_get_texture(id pid, const char *name, id *tex)
     vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL && raw->resolver.created != 2);
 
-    map_get(raw->resolver.mtexs, key_chars(name), tex);
+    *tex = raw->resolver.tex;
 }
 
 void vga_framebuffer_begin(id pid)
@@ -714,9 +694,6 @@ void vga_framebuffer_begin(id pid)
 void vga_framebuffer_end(id pid)
 {
     struct vga_framebuffer *raw;
-    unsigned len;
-    int i;
-    unsigned draw[32] = {GL_NONE};
 
     vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL);
@@ -724,23 +701,24 @@ void vga_framebuffer_end(id pid)
     if (raw->resolver.created == 0) return;
 
     if (raw->sampler.created) {
+    #if OS != WEB
+#if OS == IOS
+        glBindFramebuffer(GL_READ_FRAMEBUFFER_APPLE, raw->sampler.glid);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER_APPLE, raw->resolver.glid);
+        glResolveMultisampleFramebufferAPPLE();
+        GLenum discards[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT};
+        glDiscardFramebufferEXT(GL_READ_FRAMEBUFFER_APPLE, 2, discards);
+#else
         glBindFramebuffer(GL_READ_FRAMEBUFFER, raw->sampler.glid);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, raw->resolver.glid);
-
-        vector_get_size(raw->resolver.vtexs, &len);
-        for (i = 0; i < len; ++i) {
-            draw[i] = GL_COLOR_ATTACHMENT0 + i;
-            glReadBuffer(draw[i]);
-            glDrawBuffers(len, draw);
-            glBlitFramebuffer(
-                0, 0, raw->width, raw->height,
-                0, 0, raw->width, raw->height,
+        glBlitFramebuffer(0, 0,
+                raw->width,
+                raw->height, 0, 0,
+                raw->width,
+                raw->height,
                 GL_COLOR_BUFFER_BIT, GL_LINEAR);
-            draw[i] = GL_NONE;
-        }
-
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+#endif
+    #endif
     } else {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
@@ -905,23 +883,7 @@ static void vga_program_clear(struct vga_program *p)
 
 static void get_complete_shader(id buf, const char *path)
 {
-    const char *ptr;
-
-    ptr = (const char *)glGetString(GL_VERSION);
-    if(strstr(ptr, "ES")) {
-        buffer_append(buf, LITERAL("#version 300 es"));
-    } else {
-        buffer_append(buf, LITERAL("#version "));
-        ptr = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
-        while(*ptr) {
-            if(*ptr != '.') {
-                buffer_append(buf, ptr, 1);
-            }
-            ptr++;
-        }
-    }
-
-    buffer_append(buf, LITERAL("\n"));
+    buffer_append(buf, LITERAL("#version 100\n"));
     buffer_append_file(buf, path);
 }
 

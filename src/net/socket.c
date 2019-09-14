@@ -3,6 +3,8 @@
 #include "types/buffer.h"
 #include "types/thread.h"
 
+#if OS != WEB
+
 #if OS == LINUX
     #ifndef __USE_GNU
     #define __USE_GNU 1
@@ -620,3 +622,5 @@ finish:
         free(events);
     }
 }
+
+#endif

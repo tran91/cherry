@@ -645,7 +645,11 @@ static void __dump(id pid, unsigned stack)
         break;
     case JSON_NUMBER:
         number_get(rje->any, &f);
-        debug("%f", f);
+        if (floor(f) == ceil(f)) {            
+            debug("%ld", (long)f);
+        } else {
+            debug("%e", f);
+        }
         break;
     case JSON_BOOLEAN:
         number_get(rje->any, &f);

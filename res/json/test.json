@@ -6,7 +6,7 @@
             "ko" : 123e2
         }
     },
-    "arr" : [1, 2, 3, 4, 5, 6],
+    "arr" : [1, 2, 3.4, 4, 5, 6],
     "num" : [false, true, false, true, null],
     "mix" : [1, 2, "3", null, [99, 100, "101"], {
         "name" : "Tôi tên là ...\u1234"

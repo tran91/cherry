@@ -1,7 +1,9 @@
 #include "thread.h"
 #include "vector.h"
 #include <pthread.h>
-#include <openssl/err.h>
+#if OS != WEB
+    #include <openssl/err.h>
+#endif
 
 void thread_job_run(id pid);
 
@@ -82,7 +84,9 @@ check:
 
 finish:
     free(pid);
-    ERR_remove_state(1);
+    #if OS != WEB
+        ERR_remove_state(1);
+    #endif
     return (void *)1;
 }
 

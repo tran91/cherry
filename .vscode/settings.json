@@ -5,6 +5,8 @@
         "opengl.h": "c",
         "gl.h": "c",
         "glext.h": "c",
-        "random": "c"
+        "random": "c",
+        "sdl.h": "c",
+        "sdl_opengl.h": "c"
     }
 }

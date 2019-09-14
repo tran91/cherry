@@ -5,6 +5,8 @@
 #include "net/http_client.h"
 #include "net/socket.h"
 
+#if OS != WEB
+
 /*
  * server side
  */
@@ -67,3 +69,5 @@ int main(int argc, char **argv)
     }    
     return 0;
 }
+
+#endif

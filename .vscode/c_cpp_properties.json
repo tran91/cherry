@@ -9,7 +9,7 @@
                 "${workspaceFolder}/vendor/zip/include",
                 "${workspaceFolder}/vendor/freetype/include"
             ],
-            "defines": ["BUILD_OPENGL"],
+            "defines": ["BUILD_OPENGL_2"],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
             "cppStandard": "c++17",
