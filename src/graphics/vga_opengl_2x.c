@@ -485,7 +485,7 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
         if (id_validate(p->resolver.tex)) {
             vga_texture_fetch(p->resolver.tex, &vtx);
             if (vtx->width != p->width || vtx->height != p->height) {
-                vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);                
+                vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);                        
             }
         } else {
             vga_texture_new(&p->resolver.tex);

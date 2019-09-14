@@ -65,7 +65,6 @@ static void tester_setup(id pid, unsigned width, unsigned height, unsigned glid)
 
 	vga_framebuffer_new(&raw->fb);
 	vga_framebuffer_set_size(raw->fb, width, height);
-	vga_framebuffer_set_multisampling(raw->fb, 4);
 	vga_framebuffer_add_texture(raw->fb, "diffuse");
 
 	vga_program_new(&raw->program.quad);
@@ -93,7 +92,10 @@ static void tester_update(id pid)
 	 * render to user framebuffer
 	 */
 	vga_framebuffer_begin(raw->fb);
-	vga_program_set_uniform_vec4_scalar(raw->program.quad, 1, 0, 0, 1, "u_color", 0);
+	static float r = 0.0;
+	r += 0.01;
+	if (r >= 1) r = 0;
+	vga_program_set_uniform_vec4_scalar(raw->program.quad, r, 0, 0, 1, "u_color", 0);
 	vga_program_draw_array(raw->program.quad, raw->group, VGA_TRIANGLES, 0, 6);
 	vga_framebuffer_end(raw->fb);
 
@@ -115,24 +117,47 @@ static void tester_update(id pid)
 
 static id game = id_null;
 
+EMSCRIPTEN_KEEPALIVE void game_resize(int w, int h)
+{
+	struct tester *raw;
+	signed glid;
+
+	tester_fetch(game, &raw);
+	assert(raw != NULL);
+
+	release(raw->fb);
+	vga_framebuffer_new(&raw->fb);
+	vga_framebuffer_set_size(raw->fb, w, h);
+	vga_framebuffer_add_texture(raw->fb, "diffuse");	
+
+	vga_screen_set_size(raw->screen, w, h);
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &glid);
+	void vga_screen_set_glid(id pid, unsigned glid);
+	vga_screen_set_glid(raw->screen, glid);
+	vga_screenbuffer_set_screen(raw->screen_buffer, raw->screen);
+}
+
 int init_gl()
 {
 	unsigned width = 800;
 	unsigned height = 480;
 	signed glid;
 
+	double w, h;
+	emscripten_get_element_css_size("canvas", &w, &h);
+
+	width = w;
+	height = h;
 	if (glfwInit() != GL_TRUE) {
 		printf("glfwInit() failed\n");
 		return GL_FALSE;
 	}
-
 	if (glfwOpenWindow(width, height, 8, 8, 8, 8, 16, 8, GLFW_WINDOW) != GL_TRUE) {
 		printf("glfwOpenWindow() failed\n");
 		return GL_FALSE;
 	}
 	
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &glid);
-
 	tester_new(&game);
 	tester_setup(game, width, height, glid);
 
