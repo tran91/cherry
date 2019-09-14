@@ -103,6 +103,48 @@ void mat4_set_mat4(id pid, id cid)
     memcpy(r1->m, r2->m, sizeof(float[16]));
 }
 
+void mat4_set_quaternion(id pid, id cid)
+{
+    struct mat4 *r1;
+    float qx, qy, qz, qw;
+
+    mat4_fetch(pid, &r1);
+    assert(r1 != NULL);
+
+    vec4_normalize(cid);
+    vec4_get(cid, &qx, &qy, &qz, &qw);
+
+    const float x = qx;
+    const float y = qy;
+    const float z = qz;
+    const float w = qw;
+
+    const float _2x = x + x;
+    const float _2y = y + y;
+    const float _2z = z + z;
+    const float _2w = w + w;
+
+    r1->m00 = 1.0f - _2y * y - _2z * z;
+    r1->m01 = _2x * y + _2w * z;
+    r1->m02 = _2x * z - _2w * y;
+    r1->m03 = 0.0f;
+
+    r1->m10 = _2x * y - _2w * z;
+    r1->m11 = 1.0f - _2x * x - _2z * z;
+    r1->m12 = _2y * z + _2w * x;
+    r1->m13 = 0.0f;
+
+    r1->m20 = _2x * z + _2w * y;
+    r1->m21 = _2y * z - _2w * x;
+    r1->m22 = 1.0f - _2x * x - _2y * y;
+    r1->m23 = 0.0f;
+
+    r1->m30 = 0.0f;
+    r1->m31 = 0.0f;
+    r1->m32 = 0.0f;
+    r1->m33 = 1.0f;
+}
+
 void mat4_inverse(id pid)
 {
     struct mat4 *raw;

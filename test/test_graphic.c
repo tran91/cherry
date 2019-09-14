@@ -156,7 +156,7 @@ int init_gl()
 		printf("glfwOpenWindow() failed\n");
 		return GL_FALSE;
 	}
-	
+
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &glid);
 	tester_new(&game);
 	tester_setup(game, width, height, glid);

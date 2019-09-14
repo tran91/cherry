@@ -16,6 +16,22 @@ static void vec4_clear(struct vec4 *p)
     
 }
 
+void vec4_set_quaternion(id pid, float ax, float ay, float az, float radian)
+{
+    struct vec4 *r1;
+
+    float half = radian * 0.5f;
+    float scale = sinf(half);
+
+    vec4_fetch(pid, &r1);
+    assert(r1 != NULL);
+
+    r1->x = ax * scale;
+    r1->y = ay * scale;
+    r1->z = az * scale;
+    r1->w = cosf(half);
+}
+
 void vec4_normalize(id pid)
 {
     struct vec4 *r1;
