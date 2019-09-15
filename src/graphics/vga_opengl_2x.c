@@ -56,7 +56,7 @@
     #include <GL/glext.h>
 
     #define GL_RGBA8_OES GL_RGBA8
-    #define GL_DEPTH24_STENCIL8_OES GL_DEPTH24_STENCIL8
+    #define GL_DEPTH24_STENCIL8_OES GL_DEPTH_COMPONENT16
 
     #define glFramebufferTexture(a,b,c,d) glFramebufferTexture2D(a,b, GL_TEXTURE_2D, c,d)
 #elif OS == WINDOWS
@@ -124,6 +124,9 @@ const unsigned VGA_TRUE = GL_TRUE;
 
 const unsigned VGA_RGBA = GL_RGBA;
 const unsigned VGA_RGB = GL_RGB;
+
+const unsigned VGA_CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE;
+const unsigned VGA_REPEAT = GL_REPEAT;
 
 /*
  * attribute
@@ -312,6 +315,20 @@ void vga_texture_load_file(id pid, const char *path)
     release(img);
 }
 
+void vga_texture_set_wrap(id pid, unsigned s, unsigned t)
+{
+    struct vga_texture *raw;
+
+    vga_texture_fetch(pid, &raw);
+    assert(raw != NULL);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, raw->glid);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
+    glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned internal_format, unsigned format, const void *ptr)
 {
     struct vga_texture *raw;
@@ -485,11 +502,11 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
         if (id_validate(p->resolver.tex)) {
             vga_texture_fetch(p->resolver.tex, &vtx);
             if (vtx->width != p->width || vtx->height != p->height) {
-                vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);                        
+                vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGB, VGA_RGB, NULL);                        
             }
         } else {
             vga_texture_new(&p->resolver.tex);
-            vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);
+            vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGB, VGA_RGB, NULL);
 
             vga_texture_fetch(p->resolver.tex, &vtx);
             glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
@@ -681,12 +698,12 @@ void vga_framebuffer_begin(id pid)
     if (raw->sampler.created) {
         glBindFramebuffer(GL_FRAMEBUFFER, raw->sampler.glid);
         glViewport(0, 0, raw->width, raw->height);
-        glClearColor(0, 0, 0, 1);
+        glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     } else {
         glBindFramebuffer(GL_FRAMEBUFFER, raw->resolver.glid);
         glViewport(0, 0, raw->width, raw->height);
-        glClearColor(0, 0, 0, 1);
+        glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     }
 }
@@ -821,13 +838,23 @@ void vga_screenbuffer_begin(id pid)
 
     glBindFramebuffer(GL_FRAMEBUFFER, raw->glid);
     glViewport(0, 0, raw->width, raw->height);
-    glClearColor(0, 0, 0, 1);
+    glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void vga_screenbuffer_end(id pid)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void vga_screenbuffer_get_screen(id pid, id *sid)
+{
+    struct vga_screenbuffer *raw;
+
+    vga_screenbuffer_fetch(pid, &raw);
+    assert(raw != NULL);
+
+    *sid = raw->scr;
 }
 
 void vga_screenbuffer_set_screen(id pid, id sid)
@@ -1013,7 +1040,11 @@ static void end(id pid)
         current_blend = raw->blend;
         if (current_blend.enable) {
             glEnable(GL_BLEND);
-            glBlendFunc(current_blend.sfactor, current_blend.dfactor);
+            #if OS == WEB
+                glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            #else
+                glBlendFunc(current_blend.sfactor, current_blend.dfactor);
+            #endif
         } else {
             glDisable(GL_BLEND);
         }

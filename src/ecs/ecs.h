@@ -7,6 +7,7 @@ type(ecs_context);
 void ecs_context_new_entity(id ctx, unsigned *entity);
 void ecs_context_update(id ctx, float delta);
 void ecs_context_remove_entity(id ctx, unsigned entity);
+void ecs_context_check_entity(id ctx, unsigned entity);
 
 void ecs_context_new_signal(id ctx, unsigned *signal);
 void ecs_context_broadcast_signal(id ctx, unsigned signal);
@@ -112,7 +113,6 @@ void name##_request(id ctx, unsigned entity, id *pid)\
 {\
     void ecs_context_add_component(id ctx, unsigned entity, id cid);\
     void ecs_context_get_component(id ctx, unsigned entity, signed type, id *cid);\
-    void ecs_context_check_entity(id ctx, unsigned entity);\
     require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
     ecs_context_get_component(ctx, entity, name##_type, pid);\
     if (!id_validate(*pid)) {\

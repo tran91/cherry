@@ -2,6 +2,7 @@
 #define __cmath_h
 
 #include "id.h"
+#include "math.h"
 
 type(number);
 void number_add_number(id pid, id cid);
@@ -66,6 +67,7 @@ void vec3_get(id pid, float *x, float *y, float *z);
 void vec3_get_x(id pid, float *n);
 void vec3_get_y(id pid, float *n);
 void vec3_get_z(id pid, float *n);
+void vec3_log(id pid);
 
 type(vec4);
 void vec4_normalize(id pid);
@@ -122,6 +124,7 @@ void mat4_rotate_x(id pid, float radian);
 void mat4_rotate_y(id pid, float radian);
 void mat4_rotate_z(id pid, float radian);
 void mat4_get(id pid, float m[16]);
+void mat4_log(id pid);
 
 #ifndef MIN
 #define MIN(a,b) (((a)<(b))?(a):(b))

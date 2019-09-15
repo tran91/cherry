@@ -309,3 +309,13 @@ void vec3_get_z(id pid, float *n)
     assert(r1 != NULL);
     *n = r1->z;
 }
+
+void vec3_log(id pid)
+{
+    struct vec3 *r1;
+
+    vec3_fetch(pid, &r1);
+    assert(r1 != NULL);
+
+    debug("%f %f %f\n", r1->x, r1->y, r1->z);
+}

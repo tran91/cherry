@@ -58,6 +58,9 @@ extern const unsigned VGA_TRUE;
 extern const unsigned VGA_RGBA;
 extern const unsigned VGA_RGB;
 
+extern const unsigned VGA_CLAMP_TO_EDGE;
+extern const unsigned VGA_REPEAT;
+
 type(vga_attribute);
 /*
  * @pid: vga_attribute
@@ -85,6 +88,7 @@ type(vga_texture);
 void vga_texture_get_width(id pid, unsigned *width);
 void vga_texture_get_height(id pid, unsigned *height);
 void vga_texture_load_file(id pid, const char *path);
+void vga_texture_set_wrap(id pid, unsigned s, unsigned t);
 void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned internal_format, unsigned format, const void *ptr);
 
 /*
@@ -107,6 +111,7 @@ type(vga_screenbuffer);
 void vga_screenbuffer_begin(id pid);
 void vga_screenbuffer_end(id pid);
 void vga_screenbuffer_set_screen(id pid, id sid);
+void vga_screenbuffer_get_screen(id pid, id *sid);
 
 /*
  * program

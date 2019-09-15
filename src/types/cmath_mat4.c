@@ -350,7 +350,7 @@ void mat4_mul_mat4(id pid, id cid)
     struct mat4 *r1, *r2, tmp;
 
     mat4_fetch(pid, &r1);
-    mat4_fetch(pid, &r2);
+    mat4_fetch(cid, &r2);
     assert(r1 != NULL && r2 != NULL);
 
     tmp = *r1;
@@ -504,4 +504,18 @@ void mat4_get(id pid, float m[16])
     assert(raw != NULL);
 
     memcpy(m, raw->m, sizeof(float[16]));
+}
+
+void mat4_log(id pid)
+{
+    struct mat4 *raw;
+
+    mat4_fetch(pid, &raw);
+    assert(raw != NULL);
+
+    debug("%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n%f %f %f %f\n",
+        raw->m[0], raw->m[1], raw->m[2], raw->m[3],
+        raw->m[4], raw->m[5], raw->m[6], raw->m[7],
+        raw->m[8], raw->m[9], raw->m[10], raw->m[11],
+        raw->m[12], raw->m[13], raw->m[14], raw->m[15]);
 }

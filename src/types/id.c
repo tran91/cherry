@@ -79,12 +79,12 @@ void create(unsigned type, id *pid)
         __created__.mask = realloc(__created__.mask, sizeof(unsigned) * (__created__.len + 1));
         __created__.mask[__created__.len] = 0;
         __created__.dt[__created__.len] = d;
-        pid->index = __created__.len;
-        pid->mask = 0;
+        pid->index = (signed)__created__.len;
+        pid->mask = (signed)0;
         __created__.len++;
     } else {
-        pid->index = __recycled__.id[__recycled__.len - 1];
-        pid->mask = __created__.mask[pid->index];
+        pid->index = (signed)__recycled__.id[__recycled__.len - 1];
+        pid->mask = (signed)__created__.mask[pid->index];
         __created__.dt[pid->index] = d;
         __recycled__.len--;
     }
@@ -103,7 +103,7 @@ void release(id pid)
 {
     struct data *d;
 
-    if (pid.index < 0 || pid.index >= __created__.len || pid.mask != __created__.mask[pid.index]) return;
+    if (pid.index < 0 || pid.index >= (signed)__created__.len || pid.mask != (signed)__created__.mask[pid.index]) return;
     d = __created__.dt[pid.index];
     if (!d) return;
     if (__sync_sub_and_fetch((volatile signed *)&d->ref_count, 1) == 0) {
@@ -138,7 +138,7 @@ void release(id pid)
 void retain(id pid)
 {
     struct data *d;
-    if (pid.index < 0 || pid.index >= __created__.len || pid.mask != __created__.mask[pid.index]) return;
+    if (pid.index < 0 || pid.index >= (signed)__created__.len || pid.mask != (signed)__created__.mask[pid.index]) return;
     
     d = __created__.dt[pid.index];
     if (d) {
@@ -150,7 +150,7 @@ void fetch(id pid, unsigned type, void *pt)
 {
     void **p = pt;
     struct data *d;
-    if (pid.index < 0 || pid.index >= __created__.len || pid.mask != __created__.mask[pid.index]) {
+    if (pid.index < 0 || pid.index >= (signed)__created__.len || pid.mask != (signed)__created__.mask[pid.index]) {
         *p = NULL;
         return;
     }
@@ -167,7 +167,7 @@ void fetch(id pid, unsigned type, void *pt)
 void which(id pid, signed *type)
 {
     struct data *d;
-    if (pid.index < 0 || pid.index >= __created__.len || pid.mask != __created__.mask[pid.index]) {
+    if (pid.index < 0 || pid.index >= (signed)__created__.len || pid.mask != (signed)__created__.mask[pid.index]) {
         *type = -1;
         return;
     }
