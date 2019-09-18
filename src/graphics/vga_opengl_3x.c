@@ -170,7 +170,7 @@ static void vga_attribute_group_clear(struct vga_attribute_group *p)
     release(p->map);
 }
 
-void vga_attribute_group_add(id pid, id attr, const char *name, signed data_type, signed size, unsigned normalized, signed stride, unsigned offset)
+void vga_attribute_group_set(id pid, id attr, const char *name, const unsigned index, signed data_type, signed size, unsigned normalized, signed stride, unsigned offset)
 {
     struct vga_attribute_group *raw;
     struct vga_attribute *a_raw;
@@ -180,7 +180,6 @@ void vga_attribute_group_add(id pid, id attr, const char *name, signed data_type
     vga_attribute_fetch(attr, &a_raw);
     assert(raw != NULL);
 
-    map_get_size(raw->map, &index);
     map_set(raw->map, key_chars(name), attr);
 
     glBindVertexArray(raw->glid);
@@ -1281,6 +1280,19 @@ void vga_program_set_uniform_mat4(id pid, id vid, const char *name, const signed
     mat4_get(vid, m);
     glUniformMatrix4fv(i, 1, 0, m);
 }
+
+void vga_program_bind_attribute_location(id pid, const char *name, const unsigned index)
+{
+    struct vga_program *raw;
+
+    begin(pid);
+
+    vga_program_fetch(pid, &raw);
+    assert(raw != NULL);
+    glBindAttribLocation(raw->glid, index, name);
+    glLinkProgram(raw->glid);
+}
+
 
 void vga_program_set_depth(id pid, const depth_opt opt)
 {

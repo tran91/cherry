@@ -69,14 +69,16 @@ static void tester_setup(id pid, unsigned width, unsigned height, unsigned glid)
 
 	vga_program_new(&raw->program.quad);
 	vga_program_load(raw->program.quad, "inner://res/shaders/quad.vert", "inner://res/shaders/quad.frag");
+	vga_program_bind_attribute_location(raw->program.quad, "position", 0);
 
 	vga_program_new(&raw->program.image);
 	vga_program_load(raw->program.image, "inner://res/shaders/image.vert", "inner://res/shaders/image.frag");
+	vga_program_bind_attribute_location(raw->program.image, "position", 0);
 
 	vga_attribute_group_new(&raw->group);
 	vga_attribute_new(&attr);
 	vga_attribute_fill(attr, positions, sizeof(positions), VGA_STATIC);
-	vga_attribute_group_add(raw->group, attr, "positions", VGA_FLOAT, 3, VGA_FALSE, sizeof(float) * 3, 0);
+	vga_attribute_group_set(raw->group, attr, "position", 0, VGA_FLOAT, 3, VGA_FALSE, sizeof(float) * 3, 0);
 	release(attr);
 }
 

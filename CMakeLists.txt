@@ -135,7 +135,7 @@ if (USE_OPENGL_2 OR USE_OPENGL_3)
 
 		if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 			set(CMAKE_EXECUTABLE_SUFFIX ".html")
-			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_SDL=2 --use-preload-plugins --preload-file ../../../data@")
+			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --use-preload-plugins --preload-file ../../../data@")
 			set(OPENGL_APPLICATION )
 		else()
 			set(OPENGL_APPLICATION SDL2)
@@ -145,26 +145,26 @@ if (USE_OPENGL_2 OR USE_OPENGL_3)
 			add_executable(test_https "test/test_https.c")
 			add_dependencies(test_https cherry ${OPENGL_APPLICATION})
 			target_link_libraries(test_https cherry ${OPENGL_APPLICATION})
+
+			add_executable(test_xml "test/test_xml.c")
+			add_dependencies(test_xml cherry ${OPENGL_APPLICATION})
+			target_link_libraries(test_xml cherry ${OPENGL_APPLICATION})
+
+			add_executable(test_json "test/test_json.c")
+			add_dependencies(test_json cherry ${OPENGL_APPLICATION})
+			target_link_libraries(test_json cherry ${OPENGL_APPLICATION})
+
+			add_executable(test_collada "test/test_collada.c")
+			add_dependencies(test_collada cherry ${OPENGL_APPLICATION})
+			target_link_libraries(test_collada cherry ${OPENGL_APPLICATION})
+
+			add_executable(test_ecs "test/test_ecs.c")
+			add_dependencies(test_ecs cherry ${OPENGL_APPLICATION})
+			target_link_libraries(test_ecs cherry ${OPENGL_APPLICATION})
+
+			add_executable(test_graphic "test/test_graphic.c")
+			add_dependencies(test_graphic cherry ${OPENGL_APPLICATION})
+			target_link_libraries(test_graphic cherry ${OPENGL_APPLICATION})
 		endif()
-
-		add_executable(test_xml "test/test_xml.c")
-		add_dependencies(test_xml cherry ${OPENGL_APPLICATION})
-		target_link_libraries(test_xml cherry ${OPENGL_APPLICATION})
-
-		add_executable(test_json "test/test_json.c")
-		add_dependencies(test_json cherry ${OPENGL_APPLICATION})
-		target_link_libraries(test_json cherry ${OPENGL_APPLICATION})
-
-		add_executable(test_collada "test/test_collada.c")
-		add_dependencies(test_collada cherry ${OPENGL_APPLICATION})
-		target_link_libraries(test_collada cherry ${OPENGL_APPLICATION})
-
-		add_executable(test_ecs "test/test_ecs.c")
-		add_dependencies(test_ecs cherry ${OPENGL_APPLICATION})
-		target_link_libraries(test_ecs cherry ${OPENGL_APPLICATION})
-
-		add_executable(test_graphic "test/test_graphic.c")
-		add_dependencies(test_graphic cherry ${OPENGL_APPLICATION})
-		target_link_libraries(test_graphic cherry ${OPENGL_APPLICATION})
 	endif()
 endif()

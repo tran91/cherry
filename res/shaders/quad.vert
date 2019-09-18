@@ -6,9 +6,9 @@
     #define output(name, type) out type name
 #endif
 
-input(a_pos, vec3, 0);
+input(position, vec3, 0);
 
 void main()
 {
-    gl_Position = vec4(a_pos, 1.0);
+    gl_Position = vec4(position, 1.0);
 }

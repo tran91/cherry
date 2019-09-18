@@ -6,11 +6,11 @@
     #define output(name, type) out type name
 #endif
 
-input(a_pos, vec3, 0);
+input(position, vec3, 0);
 output(texcoord, vec2);
 
 void main()
 {
-    texcoord = a_pos.xy * 0.5 + 0.5;
-    gl_Position = vec4(a_pos, 1.0);
+    texcoord = position.xy * 0.5 + 0.5;
+    gl_Position = vec4(position, 1.0);
 }

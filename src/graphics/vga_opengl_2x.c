@@ -59,6 +59,7 @@
     #define GL_DEPTH24_STENCIL8_OES GL_DEPTH_COMPONENT16
 
     #define glFramebufferTexture(a,b,c,d) glFramebufferTexture2D(a,b, GL_TEXTURE_2D, c,d)
+
 #elif OS == WINDOWS
     #include <GL/glew.h>
 #else
@@ -206,17 +207,15 @@ static void vga_attribute_group_clear(struct vga_attribute_group *p)
     release(p->map);
 }
 
-void vga_attribute_group_add(id pid, id attr, const char *name, signed data_type, signed size, unsigned normalized, signed stride, unsigned offset)
+void vga_attribute_group_set(id pid, id attr, const char *name, const unsigned index, signed data_type, signed size, unsigned normalized, signed stride, unsigned offset)
 {
     struct vga_attribute_group *raw;
     struct vga_attribute *a_raw;
-    unsigned index;
 
     vga_attribute_group_fetch(pid, &raw);
     vga_attribute_fetch(attr, &a_raw);
     assert(raw != NULL);
 
-    map_get_size(raw->map, &index);
     map_set(raw->map, key_chars(name), attr);
 
     glBindVertexArray(raw->glid);
@@ -293,8 +292,9 @@ void vga_texture_load_file(id pid, const char *path)
     image_get_size(img, &raw->width, &raw->height);
     image_get_ptr(img, &ptr);
     image_get_number_channels(img, &channels);
-
+    
     glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, raw->glid);
     switch (channels) {
         case 4:
@@ -323,6 +323,7 @@ void vga_texture_set_wrap(id pid, unsigned s, unsigned t)
     assert(raw != NULL);
 
     glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, raw->glid);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, s);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, t);
@@ -340,12 +341,11 @@ void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned inte
     raw->height = height;
 
     glActiveTexture(GL_TEXTURE0);
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, raw->glid);
     if (format == VGA_RGBA) {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, raw->width, raw->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, ptr);
     } else if (format == VGA_RGB) {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, raw->width, raw->height, 0, GL_RGB, GL_UNSIGNED_BYTE, ptr);
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -502,11 +502,11 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
         if (id_validate(p->resolver.tex)) {
             vga_texture_fetch(p->resolver.tex, &vtx);
             if (vtx->width != p->width || vtx->height != p->height) {
-                vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGB, VGA_RGB, NULL);                        
+                vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);                        
             }
         } else {
             vga_texture_new(&p->resolver.tex);
-            vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGB, VGA_RGB, NULL);
+            vga_texture_load_raw(p->resolver.tex, p->width, p->height, VGA_RGBA, VGA_RGBA, NULL);
 
             vga_texture_fetch(p->resolver.tex, &vtx);
             glBindFramebuffer(GL_FRAMEBUFFER, p->resolver.glid);
@@ -1002,7 +1002,7 @@ static void end(id pid)
     static stencil_opt current_stencil;
     static blend_opt current_blend;
     static cull_opt current_cull;
-    static id current_tex[32] = {id_null};
+    // static id current_tex[32] = {id_null};
     struct vga_texture *tex;
     key k;
     id obj;
@@ -1064,13 +1064,14 @@ static void end(id pid)
     index = 0;
     map_iterate(raw->mtexs, index, &k, &obj);
     while (id_validate(obj)) {
-        if (!id_equal(current_tex[index], obj)) {
-            current_tex[index] = obj;
+        // if (!id_equal(current_tex[index], obj)) {
+            // current_tex[index] = obj;
             vga_texture_fetch(obj, &tex);
             glActiveTexture(GL_TEXTURE0 + index);
+            glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, tex->glid);
             glUniform1i(glGetUniformLocation(raw->glid, k.ptr), (int)index);
-        }
+        // }
         index++;
         map_iterate(raw->mtexs, index, &k, &obj);
     }
@@ -1245,6 +1246,18 @@ void vga_program_set_uniform_mat4(id pid, id vid, const char *name, const signed
     i = glGetUniformLocation(raw->glid, name);
     mat4_get(vid, m);
     glUniformMatrix4fv(i, 1, 0, m);
+}
+
+void vga_program_bind_attribute_location(id pid, const char *name, const unsigned index)
+{
+    struct vga_program *raw;
+
+    begin(pid);
+
+    vga_program_fetch(pid, &raw);
+    assert(raw != NULL);
+    glBindAttribLocation(raw->glid, index, name);
+    glLinkProgram(raw->glid);
 }
 
 void vga_program_set_depth(id pid, const depth_opt opt)

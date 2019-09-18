@@ -147,6 +147,55 @@ void name##_new(id *pid)\
     build(*pid, key_null);\
 }
 
+#define make_local_type(name)\
+static id name##_cache = id_init;\
+static void name##_clean()\
+{\
+    release(name##_cache);\
+}\
+static signed name##_type = -1;\
+static volatile unsigned name##_barrier = 0;\
+struct name;\
+static void name##_init(struct name *s, key k);\
+static void name##_clear(struct name *s);\
+static void name##_fetch(id pid, struct name **ptr)\
+{\
+    void fetch(id pid, unsigned type, void *p);\
+    fetch(pid, (unsigned)name##_type, ptr);\
+}\
+static void name##_shared(key k, id *pid)\
+{\
+    require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
+\
+    if (!id_validate(name##_cache)) {\
+        map_shared(key_null, &name##_cache);\
+        atexit(name##_clean);\
+    }\
+\
+    if (k.type >= 1) {\
+        lock(&name##_barrier);\
+        map_get(name##_cache, k, pid);\
+        if (id_validate(*pid)) {\
+            retain(*pid);\
+            unlock(&name##_barrier);\
+        } else {\
+            create(name##_type, pid);\
+            map_set(name##_cache, k, *pid);\
+            unlock(&name##_barrier);\
+            build(*pid, k);\
+        }\
+    } else {\
+        create(name##_type, pid);\
+        build(*pid, k);\
+    }\
+}\
+static void name##_new(id *pid)\
+{\
+    require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
+    create(name##_type, pid);\
+    build(*pid, key_null);\
+}
+
 type(empty);
 
 /* platform */

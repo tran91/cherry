@@ -84,6 +84,26 @@ void vec4_set_quaternion_identity(id pid)
     r1->w = 1;
 }
 
+void vec4_quaternion_mul_quaternion(id pid, id cid)
+{
+    struct vec4 *r1, *r2;
+    float x, y, z, w;
+
+    vec4_fetch(pid, &r1);
+    vec4_fetch(cid, &r2);
+    assert(r1 != NULL && r2 != NULL);
+
+    w = (r1->w * r2->w - r1->x * r2->x - r1->y * r2->y - r1->z * r2->z);
+    x = (r1->w * r2->x + r1->x * r2->w - r1->y * r2->z + r1->z * r2->y);
+    y = (r1->w * r2->y + r1->x * r2->z + r1->y * r2->w - r1->z * r2->x);
+    z = (r1->w * r2->z - r1->x * r2->y + r1->y * r2->x + r1->z * r2->w);
+
+    r1->x = x;
+    r1->y = y;
+    r1->z = z;
+    r1->w = w;
+}
+
 void vec4_add_vec4(id pid, id cid)
 {
     struct vec4 *r1, *r2;

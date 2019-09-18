@@ -68,6 +68,7 @@ void vec3_get_x(id pid, float *n);
 void vec3_get_y(id pid, float *n);
 void vec3_get_z(id pid, float *n);
 void vec3_log(id pid);
+void vec3_point_line_distance(id p0, id p1, id p2, float *f);
 
 type(vec4);
 void vec4_normalize(id pid);
@@ -75,6 +76,7 @@ void vec4_length(id pid, float *r);
 void vec4_distance(id pid, id cid, float *r);
 void vec4_set_quaternion_identity(id pid);
 void vec4_set_quaternion(id pid, float ax, float ay, float az, float radian);
+void vec4_quaternion_mul_quaternion(id pid, id cid);
 void vec4_add_vec4(id pid, id cid);
 void vec4_sub_vec4(id pid, id cid);
 void vec4_mul_vec4(id pid, id cid);

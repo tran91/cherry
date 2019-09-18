@@ -310,6 +310,34 @@ void vec3_get_z(id pid, float *n)
     *n = r1->z;
 }
 
+void vec3_point_line_distance(id p0, id p1, id p2, float *f)
+{
+    id a, b, c;
+    float fa, fc;
+
+    vec3_new(&a);
+    vec3_new(&b);
+    vec3_new(&c);
+
+    vec3_set_vec3(a, p0);
+    vec3_set_vec3(b, p0);
+    vec3_set_vec3(c, p2);
+
+    vec3_sub_vec3(a, p1);
+    vec3_sub_vec3(b, p2);
+    vec3_sub_vec3(c, p1);
+
+    vec3_cross_vec3(a, b);
+    vec3_length(a, &fa);
+    vec3_length(c, &fc);
+
+    *f = fa / fc;
+
+    release(a);
+    release(b);
+    release(c);
+}
+
 void vec3_log(id pid)
 {
     struct vec3 *r1;

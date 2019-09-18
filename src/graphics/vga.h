@@ -78,7 +78,7 @@ type(vga_attribute_group);
  * @pid: vga_attribute_group
  * @attr: vga_attribute
  */
-void vga_attribute_group_add(id pid, id attr, const char *name, signed data_type, signed size, unsigned normalized, signed stride, unsigned offset);
+void vga_attribute_group_set(id pid, id attr, const char *name, const unsigned index, signed data_type, signed size, unsigned normalized, signed stride, unsigned offset);
 
 
 /*
@@ -133,6 +133,8 @@ void vga_program_draw_array(id pid, id group, unsigned mode, int first, int coun
  * @pid: vga_program
  */
 void vga_program_set_texture(id pid, id tex, const char *name, const signed index);
+
+void vga_program_bind_attribute_location(id pid, const char *name, const unsigned index);
 
 /*
  * @pid: vga_program
@@ -223,5 +225,12 @@ typedef struct {
         x\
     }
 void vga_program_set_cull(id pid, const cull_opt opt);
+
+/*
+ * cache
+ */
+type(vga_cache);
+void vga_cache_get_texture(id cid, const char *path, id *tid);
+void vga_cache_get_atlas_frame(id cid, const char *atlas, const char *frame, float coords[4]);
 
 #endif
