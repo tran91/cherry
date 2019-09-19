@@ -1,5 +1,3 @@
-precision highp float;
-
 #ifdef GL_ES
     #define input(name, type) varying type name
     #define get_pixel       texture2D

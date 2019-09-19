@@ -908,9 +908,19 @@ static void vga_program_clear(struct vga_program *p)
 
 #define LITERAL(p) p, sizeof(p) - 1
 
-static void get_complete_shader(id buf, const char *path)
+static void get_complete_shader(id buf, unsigned char has_precision, const char *path)
 {
+    int range[2], precision;
+
     buffer_append(buf, LITERAL("#version 100\n"));
+    if (has_precision) {
+        glGetShaderPrecisionFormat(GL_FRAGMENT_SHADER, GL_MEDIUM_FLOAT, range, &precision);
+        if (precision == 23) {
+            buffer_append(buf, LITERAL("precision highp float;\n"));
+        } else {
+            buffer_append(buf, LITERAL("precision mediump float;\n"));
+        }
+    }
     buffer_append_file(buf, path);
 }
 
@@ -931,8 +941,8 @@ void vga_program_load(id pid, const char *vert_path, const char *frag_path)
     buffer_new(&vbuf);
     buffer_new(&fbuf);
 
-    get_complete_shader(vbuf, vert_path);
-    get_complete_shader(fbuf, frag_path);
+    get_complete_shader(vbuf, 0, vert_path);
+    get_complete_shader(fbuf, 1, frag_path);
 
     vs = glCreateShader(GL_VERTEX_SHADER);
     buffer_get_ptr(vbuf, &ptr);
