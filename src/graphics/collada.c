@@ -38,6 +38,7 @@ struct collada_mesh
     id colors;
     id indice;
     id id;
+    float min_x, min_y, min_z, max_x, max_y, max_z;
 };
 make_type(collada_mesh);
 
@@ -49,6 +50,8 @@ static void collada_mesh_init(struct collada_mesh *p, key k)
     buffer_new(&p->colors);
     buffer_new(&p->indice);
     buffer_new(&p->id);
+    p->min_x = p->min_y = p->min_z = 999999;
+    p->max_x = p->max_y = p->max_z = -999999;
 }
 
 static void collada_mesh_clear(struct collada_mesh *p)
@@ -77,6 +80,8 @@ struct collada_skin
     unsigned bones_upload;
 
     id transform;
+    
+    float min_x, min_y, min_z, max_x, max_y, max_z;
 };
 make_type(collada_skin);
 
@@ -96,6 +101,9 @@ static void collada_skin_init(struct collada_skin *p, key k)
 
     p->bones_per_vertex = 0;
     p->bones_upload = 0;
+
+    p->min_x = p->min_y = p->min_z = 999999;
+    p->max_x = p->max_y = p->max_z = -999999;
 }
 
 static void collada_skin_clear(struct collada_skin *p)
@@ -230,6 +238,8 @@ struct collada_node
     unsigned bones_upload;
 
     id transform;
+
+    float min_x, min_y, min_z, max_x, max_y, max_z;
 };
 make_type(collada_node);
 
@@ -254,6 +264,9 @@ static void collada_node_init(struct collada_node *p, key k)
 
     p->bones_per_vertex = 0;
     p->bones_upload = 0;
+
+    p->min_x = p->min_y = p->min_z = 999999;
+    p->max_x = p->max_y = p->max_z = -999999;
 }
 
 static void collada_node_clear(struct collada_node *p)
@@ -427,6 +440,12 @@ static void __parse_geometry(struct collada_context *p, id xn_geometry)
             buffer_get_ptr(positions, &float_ptr);
 			j *= 3;
             buffer_append(raw_mesh->vertices, float_ptr + j, sizeof(float) * 3);
+            raw_mesh->min_x = MIN(raw_mesh->min_x, float_ptr[j]);
+            raw_mesh->min_y = MIN(raw_mesh->min_y, float_ptr[j + 1]);
+            raw_mesh->min_z = MIN(raw_mesh->min_z, float_ptr[j + 2]);
+            raw_mesh->max_x = MAX(raw_mesh->max_x, float_ptr[j]);
+            raw_mesh->max_y = MAX(raw_mesh->max_y, float_ptr[j + 1]);
+            raw_mesh->max_z = MAX(raw_mesh->max_z, float_ptr[j + 2]);
 		}
 		if(normals_offset >= 0) {
 			j = ps_ptr[i + normals_offset];
@@ -539,6 +558,12 @@ static void __parse_controller(struct collada_context *p, id xn_controller)
     assign(rskin->normals, rmesh->normals);
     assign(rskin->texcoords, rmesh->texcoords);
     assign(rskin->colors, rmesh->colors);
+    rskin->min_x = rmesh->min_x;
+    rskin->min_y = rmesh->min_y;
+    rskin->min_z = rmesh->min_z;
+    rskin->max_x = rmesh->max_x;
+    rskin->max_y = rmesh->max_y;
+    rskin->max_z = rmesh->max_z;
 
     /* find skin transform */
     xml_query_search(query, xn_skin, "/bind_shape_matrix");
@@ -884,6 +909,12 @@ static void __parse_node_visual(id node, struct collada_context *p, id xn_node)
         assign(rnode->normals, rmesh->normals);
         assign(rnode->texcoords, rmesh->texcoords);
         assign(rnode->colors, rmesh->colors);
+        rnode->min_x = rmesh->min_x;
+        rnode->min_y = rmesh->min_y;
+        rnode->min_z = rmesh->min_z;
+        rnode->max_x = rmesh->max_x;
+        rnode->max_y = rmesh->max_y;
+        rnode->max_z = rmesh->max_z;
 
         xml_query_search(query, xn_node, "/matrix");
         xml_query_get_node(query, 0, &xn_matrix);
@@ -905,6 +936,13 @@ static void __parse_node_visual(id node, struct collada_context *p, id xn_node)
         assign(rnode->bone_names, rskin->bone_names);
         rnode->bones_upload = rskin->bones_upload;
         rnode->bones_per_vertex = rskin->bones_per_vertex;
+
+        rnode->min_x = rskin->min_x;
+        rnode->min_y = rskin->min_y;
+        rnode->min_z = rskin->min_z;
+        rnode->max_x = rskin->max_x;
+        rnode->max_y = rskin->max_y;
+        rnode->max_z = rskin->max_z;
 
         assign(rnode->amature, amature);
 	}
@@ -1227,4 +1265,19 @@ void collada_node_get_inverse_bind_poses(id pid, id *vid)
     assert(rn != NULL);
 
     *vid = rn->inverse_bind_poses;
+}
+
+void collada_node_get_aabb(id pid, float *min_x, float *min_y, float *min_z, float *max_x, float *max_y, float *max_z)
+{
+    struct collada_node *rn;
+
+    collada_node_fetch(pid, &rn);
+    assert(rn != NULL);
+
+    *min_x = rn->min_x;
+    *min_y = rn->min_y;
+    *min_z = rn->min_z;
+    *max_x = rn->max_x;
+    *max_y = rn->max_y;
+    *max_z = rn->max_z;
 }

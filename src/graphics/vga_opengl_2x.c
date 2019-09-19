@@ -1308,4 +1308,11 @@ void vga_program_set_cull(id pid, const cull_opt opt)
     raw->cull = opt;
 }
 
+void vga_get_max_texture_size(unsigned *size)
+{
+    GLint v;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &v);
+    *size = v;
+}
+
 #endif

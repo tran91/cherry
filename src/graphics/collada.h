@@ -118,4 +118,6 @@ void collada_node_get_bones_upload(id pid, unsigned *v);
  */
 void collada_node_get_inverse_bind_poses(id pid, id *vid);
 
+void collada_node_get_aabb(id pid, float *min_x, float *min_y, float *min_z, float *max_x, float *max_y, float *max_z);
+
 #endif

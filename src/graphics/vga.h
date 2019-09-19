@@ -233,4 +233,6 @@ type(vga_cache);
 void vga_cache_get_texture(id cid, const char *path, id *tid);
 void vga_cache_get_atlas_frame(id cid, const char *atlas, const char *frame, float coords[4]);
 
+void vga_get_max_texture_size(unsigned *size);
+
 #endif
