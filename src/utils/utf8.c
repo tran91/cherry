@@ -32,3 +32,63 @@ void utf8_width(const char *c, unsigned char *width)
 
     *width = w;
 }
+
+void utf8_code(const char *c_ptr, unsigned *code)
+{
+    const char * volatile c         = c_ptr;
+    volatile unsigned code_point = 0;
+    volatile unsigned val        = (unsigned)(*c);
+    unsigned char width;
+    utf8_width(c_ptr, &width);
+
+    switch (width) {
+        case 1:
+            val = val & 0x7F;
+            code_point |= val;
+            break;
+        case 2:
+            val = (val & 0x1F) << 6;
+            code_point |= val;
+
+            c++;
+            val = (unsigned)(*c);
+            val = val & 0x3F;
+            code_point |= val;
+            break;
+        case 3:
+            val = (val & 0xF) << 12;
+            code_point |= val;
+
+            c++;
+            val = (unsigned)(*c);
+            val = (val & 0x3F) << 6;
+            code_point |= val;
+
+            c++;
+            val = (unsigned)(*c);
+            val = val & 0x3F;
+            code_point |= val;
+            break;
+        case 4:
+            val = (val & 0x7) << 18;
+            code_point |= val;
+
+            c++;
+            val = (unsigned)(*c);
+            val = (val & 0x3F) << 12;
+            code_point |= val;
+
+            c++;
+            val = (unsigned)(*c);
+            val = (val & 0x3F) << 6;
+            code_point |= val;
+
+            c++;
+            val = (unsigned)(*c);
+            val = (val & 0x3F) << 6;
+            code_point |= val;
+            break;
+    }
+
+    *code = code_point;
+}

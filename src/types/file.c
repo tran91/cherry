@@ -145,6 +145,25 @@ void file_seek(id pid, unsigned offset)
     fseek(raw->ptr, offset, SEEK_SET);
 }
 
+void file_size(const char *path, unsigned *size)
+{
+    const char *str = NULL;
+	if(strncmp(path, "inner://", sizeof("inner://") - 1) == 0) {
+        str = path + sizeof("inner://") - 1;
+    } else if(strncmp(path, "local://", sizeof("local://") - 1) == 0) {
+        str = path + sizeof("local://") - 1;
+    } else {
+        str = path;
+    }
+        
+	struct stat buf;
+	if(stat(str, &buf) < 0) {
+		*size = 0;
+	}
+
+    *size = buf.st_size;
+}
+
 #elif OS == WEB
 
 static void path(const char *url, const char **p, const char **mode)
@@ -218,6 +237,25 @@ void file_seek(id pid, unsigned offset)
     file_fetch(pid, &raw);
     assert(raw != NULL);
     fseek(raw->ptr, offset, SEEK_SET);
+}
+
+void file_size(const char *path, unsigned *size)
+{
+    const char *str = NULL;
+	if(strncmp(path, "inner://", sizeof("inner://") - 1) == 0) {
+        str = path + sizeof("inner://") - 1;
+    } else if(strncmp(path, "local://", sizeof("local://") - 1) == 0) {
+        str = path + sizeof("local://") - 1;
+    } else {
+        str = path;
+    }
+        
+	struct stat buf;
+	if(stat(str, &buf) < 0) {
+		*size = 0;
+	}
+
+    *size = buf.st_size;
 }
 
 #endif

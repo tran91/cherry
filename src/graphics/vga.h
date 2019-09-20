@@ -57,6 +57,7 @@ extern const unsigned VGA_TRUE;
 
 extern const unsigned VGA_RGBA;
 extern const unsigned VGA_RGB;
+extern const unsigned VGA_RED;
 
 extern const unsigned VGA_CLAMP_TO_EDGE;
 extern const unsigned VGA_REPEAT;

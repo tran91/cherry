@@ -88,6 +88,7 @@ const unsigned VGA_TRUE = GL_TRUE;
 
 const unsigned VGA_RGBA = GL_RGBA;
 const unsigned VGA_RGB = GL_RGB;
+const unsigned VGA_RED = GL_RED;
 
 const unsigned VGA_CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE;
 const unsigned VGA_REPEAT = GL_REPEAT;
@@ -307,10 +308,13 @@ void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned inte
     glBindTexture(GL_TEXTURE_2D, raw->glid);
     if (format == VGA_RGBA) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, raw->width, raw->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, ptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, raw->width, raw->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, ptr);
     } else if (format == VGA_RGB) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, raw->width, raw->height, 0, GL_RGB, GL_UNSIGNED_BYTE, ptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, raw->width, raw->height, 0, GL_RGB, GL_UNSIGNED_BYTE, ptr);
+    }  else if (format == VGA_RED) {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, internal_format, raw->width, raw->height, 0, GL_RED, GL_UNSIGNED_BYTE, ptr);
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
