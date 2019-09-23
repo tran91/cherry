@@ -1177,6 +1177,20 @@ void vga_program_set_uniform_float(id pid, float value, const char *name, const 
     glUniform1f(i, value);
 }
 
+void vga_program_set_uniform_float_array(id pid, float *value, unsigned count, const char *name, const signed index)
+{
+    struct vga_program *raw;
+    int i;
+
+    begin(pid);
+
+    vga_program_fetch(pid, &raw);
+    assert(raw != NULL);
+
+    i = glGetUniformLocation(raw->glid, name);
+    glUniform1fv(i, count, value);
+}
+
 void vga_program_set_uniform_vec2_scalar(id pid, float x, float y, const char *name, const signed index)
 {
     struct vga_program *raw;
@@ -1217,6 +1231,20 @@ void vga_program_set_uniform_vec4_scalar(id pid, float x, float y, float z, floa
 
     i = glGetUniformLocation(raw->glid, name);
     glUniform4f(i, x, y, z, w);
+}
+
+void vga_program_set_uniform_vec4_array(id pid, float *value, unsigned count, const char *name, const signed index)
+{
+    struct vga_program *raw;
+    int i;
+
+    begin(pid);
+
+    vga_program_fetch(pid, &raw);
+    assert(raw != NULL);
+
+    i = glGetUniformLocation(raw->glid, name);
+    glUniform4fv(i, count, value);
 }
 
 void vga_program_set_uniform_mat4_scalar(id pid, float m[16], const char *name, const signed index)
@@ -1358,6 +1386,21 @@ void vga_get_max_texture_size(unsigned *size)
 {
     GLint v;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &v);
+    *size = v;
+}
+
+
+void vga_get_max_vertex_uniform_vectors(unsigned *size)
+{
+    GLint v;
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &v);
+    *size = v;
+}
+
+void vga_get_max_fragment_uniform_vectors(unsigned *size)
+{
+    GLint v;
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &v);
     *size = v;
 }
 

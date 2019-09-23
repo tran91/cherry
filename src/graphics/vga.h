@@ -142,9 +142,11 @@ void vga_program_bind_attribute_location(id pid, const char *name, const unsigne
  */
 void vga_program_set_uniform_int(id pid, int value, const char *name, const signed index);
 void vga_program_set_uniform_float(id pid, float value, const char *name, const signed index);
+void vga_program_set_uniform_float_array(id pid, float *value, unsigned count, const char *name, const signed index);
 void vga_program_set_uniform_vec2_scalar(id pid, float x, float y, const char *name, const signed index);
 void vga_program_set_uniform_vec3_scalar(id pid, float x, float y, float z, const char *name, const signed index);
 void vga_program_set_uniform_vec4_scalar(id pid, float x, float y, float z, float w, const char *name, const signed index);
+void vga_program_set_uniform_vec4_array(id pid, float *value, unsigned count, const char *name, const signed index);
 void vga_program_set_uniform_mat4_scalar(id pid, float m[16], const char *name, const signed index);
 void vga_program_set_uniform_vec2(id pid, id vid, const char *name, const signed index);
 void vga_program_set_uniform_vec3(id pid, id vid, const char *name, const signed index);
@@ -235,5 +237,7 @@ void vga_cache_get_texture(id cid, const char *path, id *tid);
 void vga_cache_get_atlas_frame(id cid, const char *atlas, const char *frame, float coords[4]);
 
 void vga_get_max_texture_size(unsigned *size);
+void vga_get_max_vertex_uniform_vectors(unsigned *size);
+void vga_get_max_fragment_uniform_vectors(unsigned *size);
 
 #endif

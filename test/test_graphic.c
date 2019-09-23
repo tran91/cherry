@@ -1,4 +1,5 @@
 #include "graphics/vga.h"
+#include "types/cmath.h"
 
 struct tester
 {
@@ -24,6 +25,16 @@ static float positions[] = {
 	-1, 1, 0
 };
 
+static float transform_index[] = {
+	0.01, 
+	0.01,
+	0.01,
+
+	1.01,
+	1.01,
+	1.01
+};
+
 static void tester_init(struct tester *p, key k)
 {
 	p->screen = id_null;
@@ -46,6 +57,10 @@ static void tester_clear(struct tester *p)
 
 static void tester_setup(id pid, unsigned width, unsigned height, unsigned glid)
 {
+	unsigned test;
+	vga_get_max_vertex_uniform_vectors(&test);
+	printf("max_vertex_us: %u\n", test);
+ 
 	struct tester *raw;
 	id attr;
 
@@ -80,6 +95,11 @@ static void tester_setup(id pid, unsigned width, unsigned height, unsigned glid)
 	vga_attribute_fill(attr, positions, sizeof(positions), VGA_STATIC);
 	vga_attribute_group_set(raw->group, attr, "position", 0, VGA_FLOAT, 3, VGA_FALSE, sizeof(float) * 3, 0);
 	release(attr);
+
+	vga_attribute_new(&attr);
+	vga_attribute_fill(attr, transform_index, sizeof(transform_index), VGA_STATIC);
+	vga_attribute_group_set(raw->group, attr, "transform_index", 1, VGA_FLOAT, 1, VGA_FALSE, sizeof(float) * 1, 0);
+	release(attr);
 }
 
 static void tester_update(id pid)
@@ -90,6 +110,7 @@ static void tester_update(id pid)
 	tester_fetch(pid, &raw);
 	assert(raw != NULL);
 
+
 	/*
 	 * render to user framebuffer
 	 */
@@ -98,6 +119,17 @@ static void tester_update(id pid)
 	r += 0.01;
 	if (r >= 1) r = 0;
 	vga_program_set_uniform_vec4_scalar(raw->program.quad, r, 0, 0, 1, "u_color", 0);
+
+	// vga_program_set_uniform_vec3_scalar(raw->program.quad, 0.5, 0.5, 0.5, "component[0].position", 0);
+	// vga_program_set_uniform_vec3_scalar(raw->program.quad, 0.5, 0.5, 0.5, "component[1].position", 0);
+
+	float arr[16];
+	for (int i= 0; i < 16; ++i) {
+		arr[i] = 0.5;
+	}
+	arr[8] = 0.5;
+	vga_program_set_uniform_vec4_array(raw->program.quad, arr, 4, "component", 0);
+
 	vga_program_draw_array(raw->program.quad, raw->group, VGA_TRIANGLES, 0, 6);
 	vga_framebuffer_end(raw->fb);
 
