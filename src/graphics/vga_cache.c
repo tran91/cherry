@@ -45,7 +45,7 @@ void vga_cache_get_atlas_frame(id cid, const char *atlas, const char *frame, flo
     struct vga_cache *rvc;
     id aid, buf, xid, query, node, attr;
     const char *ptr;
-    unsigned ptr_len, index, width, height, x, y, w, h;
+    unsigned int ptr_len, index, width, height, x, y, w, h;
     float f;
 
     vga_cache_fetch(cid, &rvc);

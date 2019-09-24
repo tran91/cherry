@@ -3,6 +3,7 @@
 #include "types/cmath.h"
 #include "types/buffer.h"
 #include "utils/utf8.h"
+#include "types/file.h"
 
 enum {
     JSON_OBJECT,
@@ -31,6 +32,66 @@ static void json_element_clear(struct json_element *p)
     p->type = JSON_NULL;
     release(p->any);
     p->any = id_null;
+}
+
+void json_element_is_object(id pid, unsigned char *ret)
+{
+    struct json_element *rje;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL);
+
+   *ret = rje->type == JSON_OBJECT ? 1 : 0;
+}
+
+void json_element_is_array(id pid, unsigned char *ret)
+{
+    struct json_element *rje;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL);
+
+   *ret = rje->type == JSON_ARRAY ? 1 : 0;
+}
+
+void json_element_is_string(id pid, unsigned char *ret)
+{
+    struct json_element *rje;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL);
+
+   *ret = rje->type == JSON_STRING ? 1 : 0;
+}
+
+void json_element_is_number(id pid, unsigned char *ret)
+{
+    struct json_element *rje;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL);
+
+   *ret = rje->type == JSON_NUMBER ? 1 : 0;
+}
+
+void json_element_is_boolean(id pid, unsigned char *ret)
+{
+    struct json_element *rje;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL);
+
+   *ret = rje->type == JSON_BOOLEAN ? 1 : 0;
+}
+
+void json_element_is_null(id pid, unsigned char *ret)
+{
+    struct json_element *rje;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL);
+
+   *ret = rje->type == JSON_NULL ? 1 : 0;
 }
 
 void json_element_make_object(id pid)
@@ -165,7 +226,7 @@ void json_array_add(id pid, id element)
     vector_push(rje->any, element);
 }
 
-void json_array_get(id pid, unsigned index, id *eid)
+void json_array_get(id pid, unsigned int index, id *eid)
 {
     struct json_element *rje;
 
@@ -175,7 +236,7 @@ void json_array_get(id pid, unsigned index, id *eid)
     vector_get(rje->any, index, eid);
 }
 
-void json_array_remove(id pid, unsigned index)
+void json_array_remove(id pid, unsigned int index)
 {
     struct json_element *rje;
 
@@ -205,7 +266,7 @@ void json_string_get_ptr(id pid, const char **ptr)
     buffer_get_ptr(rje->any, ptr);
 }
 
-void json_string_get_length(id pid, unsigned *len)
+void json_string_get_length(id pid, unsigned int *len)
 {
     struct json_element *rje;
 
@@ -578,12 +639,12 @@ void json_element_load_string(id pid, const char *ptr)
     }
 }
 
-static void __dump(id pid, unsigned stack)
+static void __dump(id pid, unsigned int stack)
 {
     struct json_element *rje;
     key k;
     id obj;
-    unsigned index, index2;
+    unsigned int index, index2;
     const char *str;
     double f;
 
@@ -669,4 +730,124 @@ void json_element_dump(id pid)
 {
     __dump(pid, 0);
     debug("\n");
+}
+
+static void __save(id pid, id fid, char buf[1024], unsigned int stack)
+{
+    struct json_element *rje;
+    key k;
+    id obj;
+    unsigned int index, index2;
+    const char *str;
+    double f;
+
+    json_element_fetch(pid, &rje);
+    assert(rje != NULL);
+
+    switch (rje->type)
+    {
+    case JSON_OBJECT:
+        file_write(fid, "{", 1);
+        // debug("{\n");
+        stack++;        
+        index = 0;
+        map_iterate(rje->any, index, &k, &obj);
+        while (id_validate(obj)) {
+            if (index > 0) {
+                // debug(",\n");
+                file_write(fid, ",", 1);
+            }
+            for (index2 = 0; index2 < stack; ++index2) {
+                // debug("\t");
+            }
+            // debug("%s : ", k.ptr);
+            file_write(fid, "\"", 1);
+            file_write(fid, k.ptr, k.len);
+            file_write(fid, "\"", 1);
+            file_write(fid, ":", 1);
+            __save(obj, fid, buf, stack);
+            index++;
+            map_iterate(rje->any, index, &k, &obj);
+        }
+        stack--;
+        // debug("\n");
+        for (index = 0; index < stack; ++index) {
+            // debug("\t");
+        }
+        file_write(fid, "}", 1);
+        // debug("}");
+        break;
+    case JSON_ARRAY:
+        // debug("[\n");
+        file_write(fid, "[", 1);
+        stack++;        
+        index = 0;
+        vector_get(rje->any, index, &obj);
+        while (id_validate(obj)) {
+            if (index > 0) {
+                // debug(",\n");
+                file_write(fid, ",", 1);
+            }
+            for (index2 = 0; index2 < stack; ++index2) {
+                // debug("\t");
+            }
+            __save(obj, fid, buf, stack);
+            index++;
+            vector_get(rje->any, index, &obj);
+        }
+        stack--;
+        // debug("\n");
+        for (index = 0; index < stack; ++index) {
+            // debug("\t");
+        }
+        // debug("]");
+        file_write(fid, "]", 1);
+        break;
+    case JSON_STRING:
+        buffer_get_ptr(rje->any, &str);
+        // debug("\"%s\"", str);
+        file_write(fid, "\"", 1);
+        file_write(fid, str, strlen(str));
+        file_write(fid, "\"", 1);
+        break;
+    case JSON_NUMBER:
+        number_get(rje->any, &f);
+        if (floor(f) == ceil(f)) {            
+            // debug("%ld", (long)f);
+            sprintf(buf, "%ld", (long)f);            
+            file_write(fid, buf, strlen(buf));
+        } else {
+            // debug("%e", f);
+            sprintf(buf, "%e", f);            
+            file_write(fid, buf, strlen(buf));
+        }
+        break;
+    case JSON_BOOLEAN:
+        number_get(rje->any, &f);
+        if (f > 0) {
+            // debug("true");
+            file_write(fid, "true", 4);
+        } else {
+            // debug("false");
+            file_write(fid, "false", 5);
+        }
+        break;
+    case JSON_NULL:
+        // debug("null");
+        file_write(fid, "null", 4);
+        break;
+    }
+}
+
+void json_element_save_file(id pid, const char *path)
+{
+    id fid;
+    char buf[1024];
+
+    file_new(&fid);
+    file_open(fid, path);
+
+    __save(pid, fid, buf, 0);
+
+    release(fid);
 }

@@ -8,9 +8,9 @@
 struct image
 {
     unsigned char *ptr;
-    unsigned width;
-    unsigned height;
-    unsigned channels;
+    unsigned int width;
+    unsigned int height;
+    unsigned int channels;
 };
 make_type(image);
 
@@ -98,7 +98,7 @@ static void __load_jpeg(struct image *p, const char *path)
     char* pTexUint;
     int yy;
     const char *buf_ptr;
-    unsigned buf_len;
+    unsigned int buf_len;
     
     buffer_new(&buf);
     buffer_append_file(buf, path);
@@ -144,7 +144,7 @@ static void __load_jpeg(struct image *p, const char *path)
 
 static void read_png_chunk(png_structp png_ptr, png_bytep data, png_size_t length)
 {
-    unsigned rv;
+    unsigned int rv;
     file_read(*(id *)png_ptr->io_ptr, data, length, &rv);
 }
 
@@ -157,7 +157,7 @@ static void load_png(struct image *p, const char *path)
     png_byte * volatile image_data = NULL;
     png_bytep * volatile row_pointers = NULL;
     png_byte header[8];
-    unsigned rv;
+    unsigned int rv;
     int bit_depth, color_type;
     int rowbytes;
 
@@ -243,7 +243,7 @@ void image_load_file(id pid, const char *path)
 {
     struct image *raw;
     id fid;
-    unsigned rv;
+    unsigned int rv;
     int test;
     png_byte header[8];
 
@@ -262,7 +262,7 @@ void image_load_file(id pid, const char *path)
     }
 }
 
-void image_get_size(id pid, unsigned *width, unsigned *height)
+void image_get_size(id pid, unsigned int *width, unsigned int *height)
 {
     struct image *raw;
 
@@ -283,7 +283,7 @@ void image_get_ptr(id pid, const unsigned char **ptr)
     *ptr = raw->ptr;
 }
 
-void image_get_number_channels(id pid, unsigned *count)
+void image_get_number_channels(id pid, unsigned int *count)
 {
     struct image *raw;
 

@@ -21,7 +21,7 @@ type(http_client);
  *      static void your_response(id user, id buf)
  *      {
  *          const char *str;
- *          unsigned len;
+ *          unsigned int len;
  * 
  *          buffer_get_ptr(buf, &str);
  *          buffer_get_length(buf, &len);

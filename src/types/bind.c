@@ -28,7 +28,7 @@ static void bind_clear(struct bind *p)
     }
 }
 
-void bind_set(id pid, unsigned size, void(*pinit)(void*), void(*pclear)(void*))
+void bind_set(id pid, unsigned int size, void(*pinit)(void*), void(*pclear)(void*))
 {
     struct bind *raw;
 
@@ -43,7 +43,7 @@ void bind_set(id pid, unsigned size, void(*pinit)(void*), void(*pclear)(void*))
     }
 }
 
-void bind_set_raw(id pid, void *copy, unsigned size)
+void bind_set_raw(id pid, void *copy, unsigned int size)
 {
     struct bind *raw;
 

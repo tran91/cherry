@@ -40,7 +40,7 @@ void thread_job_add_arguments(id pid, id cid)
 void thread_job_run(id pid)
 {
     struct thread_job *raw;
-    unsigned len;
+    unsigned int len;
     signed i;
     id arg[8];
 

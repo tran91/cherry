@@ -18,7 +18,7 @@ void buffer_append_file(id pid, const char *path);
 /*
  * @pid: buffer
  */
-void buffer_append(id pid, const void *buf, const unsigned len);
+void buffer_append(id pid, const void *buf, const unsigned int len);
 
 /*
  * @pid: buffer
@@ -32,21 +32,21 @@ void buffer_append_int_string(id pid, const char *ptr, int *max);
 /*
  * @pid: buffer
  */
-void buffer_reserve(id pid, unsigned len);
+void buffer_reserve(id pid, unsigned int len);
 
 /*
  * @pid: buffer
  */
-void buffer_get_length(id pid, unsigned *len);
-void buffer_get_length_with_stride(id pid, unsigned stride, unsigned *len);
+void buffer_get_length(id pid, unsigned int *len);
+void buffer_get_length_with_stride(id pid, unsigned int stride, unsigned int *len);
 
-void buffer_cut_with_stride(id pid, unsigned stride, unsigned index);
-void buffer_get_with_stride(id pid, unsigned stride, unsigned index, void *mem);
+void buffer_cut_with_stride(id pid, unsigned int stride, unsigned int index);
+void buffer_get_with_stride(id pid, unsigned int stride, unsigned int index, void *mem);
 
 /*
  * @pid: buffer
  */
-void buffer_replace(id pid, const void *search, const unsigned slen, const void *replace, const unsigned rlen);
+void buffer_replace(id pid, const void *search, const unsigned int slen, const void *replace, const unsigned int rlen);
 
 /*
  * @pid: buffer

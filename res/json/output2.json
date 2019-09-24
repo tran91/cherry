@@ -1,0 +1,1 @@
+{"version":"1.0","test":{"name":"here","ok":{"ko":12300}},"arr":[1,2,3.400000e+00,4,5,6],"num":[false,true,false,true,null],"mix":[1,2,"3",null,[99,100,"101"],{"name":"Tôi tên là ...\u1234"}]}

@@ -4,21 +4,21 @@
 #include "types/id.h"
 
 type(ecs_context);
-void ecs_context_new_entity(id ctx, unsigned *entity);
+void ecs_context_new_entity(id ctx, unsigned int *entity);
 void ecs_context_update(id ctx, float delta);
-void ecs_context_remove_entity(id ctx, unsigned entity);
-void ecs_context_check_entity(id ctx, unsigned entity);
+void ecs_context_remove_entity(id ctx, unsigned int entity);
+void ecs_context_check_entity(id ctx, unsigned int entity);
 
-void ecs_context_new_signal(id ctx, unsigned *signal);
-void ecs_context_broadcast_signal(id ctx, unsigned signal);
+void ecs_context_new_signal(id ctx, unsigned int *signal);
+void ecs_context_broadcast_signal(id ctx, unsigned int signal);
 
 /*
  * event
  */
 #define ecs_event(name) \
     struct name;\
-    void name##_find(id ctx, unsigned signal, id *pid);\
-    void name##_request(id ctx, unsigned signal, id *pid);
+    void name##_find(id ctx, unsigned int signal, id *pid);\
+    void name##_request(id ctx, unsigned int signal, id *pid);
 
 #define make_ecs_event(name) \
 static signed name##_type = -1;\
@@ -27,19 +27,19 @@ static void name##_init(struct name *s, key k);\
 static void name##_clear(struct name *s);\
 static void name##_fetch(id pid, struct name **ptr)\
 {\
-    void fetch(id pid, unsigned type, void *p);\
-    fetch(pid, (unsigned)name##_type, ptr);\
+    void fetch(id pid, unsigned int type, void *p);\
+    fetch(pid, (unsigned int)name##_type, ptr);\
 }\
-void name##_find(id ctx, unsigned signal, id *pid)\
+void name##_find(id ctx, unsigned int signal, id *pid)\
 {\
-    void ecs_context_get_event(id ctx, unsigned signal, signed type, id *cid);\
+    void ecs_context_get_event(id ctx, unsigned int signal, signed type, id *cid);\
     require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
     ecs_context_get_event(ctx, signal, name##_type, pid);\
 }\
-void name##_request(id ctx, unsigned signal, id *pid)\
+void name##_request(id ctx, unsigned int signal, id *pid)\
 {\
-    void ecs_context_add_event(id ctx, unsigned signal, id cid);\
-    void ecs_context_get_event(id ctx, unsigned signal, signed type, id *cid);\
+    void ecs_context_add_event(id ctx, unsigned int signal, id cid);\
+    void ecs_context_get_event(id ctx, unsigned int signal, signed type, id *cid);\
     require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
     ecs_context_get_event(ctx, signal, name##_type, pid);\
     if (!id_validate(*pid)) {\
@@ -63,16 +63,16 @@ void name##_request(id ctx, unsigned signal, id *pid)\
     static void name##_init(struct name *s, key k);\
     static void name##_clear(struct name *s);\
     static void name##_update(id ctx, id sys, float delta);\
-    static void name##_check(id ctx, id sys, unsigned entity);\
-    static void name##_listen(id ctx, id sys, unsigned signal);\
+    static void name##_check(id ctx, id sys, unsigned int entity);\
+    static void name##_listen(id ctx, id sys, unsigned int signal);\
     static void name##_fetch(id pid, struct name **ptr)\
     {\
-        void fetch(id pid, unsigned type, void *p);\
-        fetch(pid, (unsigned)name##_type, ptr);\
+        void fetch(id pid, unsigned int type, void *p);\
+        fetch(pid, (unsigned int)name##_type, ptr);\
     }\
     void name##_register(id ctx)\
     {\
-        void ecs_context_add_system(id ctx, id sid, void(*update)(id, id, float), void(*check)(id, id, unsigned), void(*listen)(id, id, unsigned));\
+        void ecs_context_add_system(id ctx, id sid, void(*update)(id, id, float), void(*check)(id, id, unsigned int), void(*listen)(id, id, unsigned int));\
         void ecs_context_get_system(id ctx, signed type, id *sid);\
         require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
         id sid;\
@@ -90,8 +90,8 @@ void name##_request(id ctx, unsigned signal, id *pid)\
  */
 #define ecs_component(name) \
     struct name;\
-    void name##_find(id ctx, unsigned entity, id *pid);\
-    void name##_request(id ctx, unsigned entity, id *pid);
+    void name##_find(id ctx, unsigned int entity, id *pid);\
+    void name##_request(id ctx, unsigned int entity, id *pid);
 
 #define make_ecs_component(name) \
 static signed name##_type = -1;\
@@ -100,19 +100,19 @@ static void name##_init(struct name *s, key k);\
 static void name##_clear(struct name *s);\
 static void name##_fetch(id pid, struct name **ptr)\
 {\
-    void fetch(id pid, unsigned type, void *p);\
-    fetch(pid, (unsigned)name##_type, ptr);\
+    void fetch(id pid, unsigned int type, void *p);\
+    fetch(pid, (unsigned int)name##_type, ptr);\
 }\
-void name##_find(id ctx, unsigned entity, id *pid)\
+void name##_find(id ctx, unsigned int entity, id *pid)\
 {\
-    void ecs_context_get_component(id ctx, unsigned entity, signed type, id *cid);\
+    void ecs_context_get_component(id ctx, unsigned int entity, signed type, id *cid);\
     require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
     ecs_context_get_component(ctx, entity, name##_type, pid);\
 }\
-void name##_request(id ctx, unsigned entity, id *pid)\
+void name##_request(id ctx, unsigned int entity, id *pid)\
 {\
-    void ecs_context_add_component(id ctx, unsigned entity, id cid);\
-    void ecs_context_get_component(id ctx, unsigned entity, signed type, id *cid);\
+    void ecs_context_add_component(id ctx, unsigned int entity, id cid);\
+    void ecs_context_get_component(id ctx, unsigned int entity, signed type, id *cid);\
     require((void(*)(void*, key))name##_init, (void(*)(void*))name##_clear, sizeof(struct name), &name##_type);\
     ecs_context_get_component(ctx, entity, name##_type, pid);\
     if (!id_validate(*pid)) {\

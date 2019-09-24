@@ -4,36 +4,36 @@
 struct data
 {
     int ref_count;
-    unsigned type;
+    unsigned int type;
 };
 
 static struct {
     struct data **dt;
-    unsigned *mask;
-    unsigned len;
-    unsigned using;
+    unsigned int *mask;
+    unsigned int len;
+    unsigned int using;
 } __created__ = {NULL, NULL, 0, 0};
 
 static struct {
-    unsigned *id;
-    unsigned len;
+    unsigned int *id;
+    unsigned int len;
 } __recycled__ = {NULL, 0};
 
 struct type {
     void(*init)(void *, key);
     void(*clear)(void *);
-    unsigned size;
+    unsigned int size;
 };
 
 static struct {
     struct type *info;
-    unsigned len;
+    unsigned int len;
 } __type__ = {
     .info = NULL,
     .len = 0
 };
 
-static volatile unsigned barrier = 0;
+static volatile unsigned int barrier = 0;
 
 static void clean()
 {
@@ -48,7 +48,7 @@ void invalidate(id *pid)
     pid->index = -1;
 }
 
-void require(void(*init)(void*, key), void(*clear)(void*), unsigned size, signed *type)
+void require(void(*init)(void*, key), void(*clear)(void*), unsigned int size, signed *type)
 {
     if (*type >= 0) return;
 
@@ -65,7 +65,7 @@ void require(void(*init)(void*, key), void(*clear)(void*), unsigned size, signed
     unlock(&barrier);
 }
 
-void create(unsigned type, id *pid)
+void create(unsigned int type, id *pid)
 {
     struct data *d;
 
@@ -76,7 +76,7 @@ void create(unsigned type, id *pid)
     lock(&barrier);
     if (__recycled__.len == 0) {
         __created__.dt = realloc(__created__.dt, sizeof(struct data *) * (__created__.len + 1));
-        __created__.mask = realloc(__created__.mask, sizeof(unsigned) * (__created__.len + 1));
+        __created__.mask = realloc(__created__.mask, sizeof(unsigned int) * (__created__.len + 1));
         __created__.mask[__created__.len] = 0;
         __created__.dt[__created__.len] = d;
         pid->index = (signed)__created__.len;
@@ -111,7 +111,7 @@ void release(id pid)
         __created__.dt[pid.index] = NULL;
         __created__.mask[pid.index]++;
         __created__.using--;
-        __recycled__.id = realloc(__recycled__.id, sizeof(unsigned) * (__recycled__.len + 1));
+        __recycled__.id = realloc(__recycled__.id, sizeof(unsigned int) * (__recycled__.len + 1));
         __recycled__.id[__recycled__.len] = pid.index;
         __recycled__.len++;
         unlock(&barrier);
@@ -146,7 +146,7 @@ void retain(id pid)
     }
 }
 
-void fetch(id pid, unsigned type, void *pt)
+void fetch(id pid, unsigned int type, void *pt)
 {
     void **p = pt;
     struct data *d;

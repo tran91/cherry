@@ -33,11 +33,11 @@ void utf8_width(const char *c, unsigned char *width)
     *width = w;
 }
 
-void utf8_code(const char *c_ptr, unsigned *code)
+void utf8_code(const char *c_ptr, unsigned int *code)
 {
     const char * volatile c         = c_ptr;
-    volatile unsigned code_point = 0;
-    volatile unsigned val        = (unsigned)(*c);
+    volatile unsigned int code_point = 0;
+    volatile unsigned int val        = (unsigned int)(*c);
     unsigned char width;
     utf8_width(c_ptr, &width);
 
@@ -51,7 +51,7 @@ void utf8_code(const char *c_ptr, unsigned *code)
             code_point |= val;
 
             c++;
-            val = (unsigned)(*c);
+            val = (unsigned int)(*c);
             val = val & 0x3F;
             code_point |= val;
             break;
@@ -60,12 +60,12 @@ void utf8_code(const char *c_ptr, unsigned *code)
             code_point |= val;
 
             c++;
-            val = (unsigned)(*c);
+            val = (unsigned int)(*c);
             val = (val & 0x3F) << 6;
             code_point |= val;
 
             c++;
-            val = (unsigned)(*c);
+            val = (unsigned int)(*c);
             val = val & 0x3F;
             code_point |= val;
             break;
@@ -74,17 +74,17 @@ void utf8_code(const char *c_ptr, unsigned *code)
             code_point |= val;
 
             c++;
-            val = (unsigned)(*c);
+            val = (unsigned int)(*c);
             val = (val & 0x3F) << 12;
             code_point |= val;
 
             c++;
-            val = (unsigned)(*c);
+            val = (unsigned int)(*c);
             val = (val & 0x3F) << 6;
             code_point |= val;
 
             c++;
-            val = (unsigned)(*c);
+            val = (unsigned int)(*c);
             val = (val & 0x3F) << 6;
             code_point |= val;
             break;

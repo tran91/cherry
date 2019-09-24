@@ -12,7 +12,7 @@
 struct file
 {
     void *ptr;
-    unsigned type;
+    unsigned int type;
 };
 make_type(file);
 
@@ -118,7 +118,7 @@ void file_open(id pid, const char *path)
     file_init(raw, key_chars(path));
 }
 
-void file_write(id pid, void *buf, unsigned len)
+void file_write(id pid, const void *buf, unsigned int len)
 {
     struct file *raw;
 
@@ -127,25 +127,31 @@ void file_write(id pid, void *buf, unsigned len)
     fwrite(buf, 1, len, raw->ptr);
 }
 
-void file_read(id pid, unsigned char *buf, unsigned len, unsigned *read)
+void file_read(id pid, unsigned char *buf, unsigned int len, unsigned int *read)
 {
     struct file *raw;
 
     file_fetch(pid, &raw);
     assert(raw != NULL);
-    *read = fread(buf, 1, len, raw->ptr);
+    if (raw->ptr) {
+        *read = fread(buf, 1, len, raw->ptr);
+    } else {
+        *read = 0;
+    }
 }
 
-void file_seek(id pid, unsigned offset)
+void file_seek(id pid, unsigned int offset)
 {
     struct file *raw;
 
     file_fetch(pid, &raw);
     assert(raw != NULL);
-    fseek(raw->ptr, offset, SEEK_SET);
+    if (raw->ptr) {
+        fseek(raw->ptr, offset, SEEK_SET);
+    }
 }
 
-void file_size(const char *path, unsigned *size)
+void file_size(const char *path, unsigned int *size)
 {
     const char *str = NULL;
 	if(strncmp(path, "inner://", sizeof("inner://") - 1) == 0) {
@@ -212,7 +218,7 @@ void file_open(id pid, const char *path)
     file_init(raw, key_chars(path));
 }
 
-void file_write(id pid, void *buf, unsigned len)
+void file_write(id pid, const void *buf, unsigned int len)
 {
     struct file *raw;
 
@@ -221,7 +227,7 @@ void file_write(id pid, void *buf, unsigned len)
     fwrite(buf, 1, len, raw->ptr);
 }
 
-void file_read(id pid, unsigned char *buf, unsigned len, unsigned *read)
+void file_read(id pid, unsigned char *buf, unsigned int len, unsigned int *read)
 {
     struct file *raw;
 
@@ -230,7 +236,7 @@ void file_read(id pid, unsigned char *buf, unsigned len, unsigned *read)
     *read = fread(buf, 1, len, raw->ptr);
 }
 
-void file_seek(id pid, unsigned offset)
+void file_seek(id pid, unsigned int offset)
 {
     struct file *raw;
 
@@ -239,7 +245,7 @@ void file_seek(id pid, unsigned offset)
     fseek(raw->ptr, offset, SEEK_SET);
 }
 
-void file_size(const char *path, unsigned *size)
+void file_size(const char *path, unsigned int *size)
 {
     const char *str = NULL;
 	if(strncmp(path, "inner://", sizeof("inner://") - 1) == 0) {

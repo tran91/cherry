@@ -5,10 +5,10 @@ static const int BLOCK_SIZE[] = {
     3203, 6421, 7919, 16069, 33391, 69313, 150151
 };
 
-static inline unsigned hash(key k, const unsigned cache_size)
+static inline unsigned int hash(key k, const unsigned int cache_size)
 {
     const void* key;
-    unsigned key_len;
+    unsigned int key_len;
     switch (k.type) {
     case KEY_LITERAL:
         key = k.ptr;
@@ -22,9 +22,9 @@ static inline unsigned hash(key k, const unsigned cache_size)
         key_len = 0;
         break;
     }
-    unsigned prime = 5381;
+    unsigned int prime = 5381;
     const char *ptr = (const char *)key;
-    unsigned i = 0;
+    unsigned int i = 0;
     while (i < key_len) {
         prime = ((prime << 5) + prime) + *ptr;
         ptr++;
@@ -38,23 +38,23 @@ struct cell
     struct cell *next;
     key k;
     id object;
-    unsigned index;
+    unsigned int index;
 };
 
 struct entry 
 {
     struct cell **list;
-    unsigned count;
+    unsigned int count;
 };
 
 struct map
 {
     struct entry **entries;
     char *flag;
-    unsigned len;
+    unsigned int len;
 
     struct cell **ctr;
-    unsigned count;
+    unsigned int count;
 };
 
 static void init(struct map *p, key k)
@@ -284,12 +284,12 @@ finish:
 
 static signed type = -1;
 static struct map *cache = NULL;
-static volatile unsigned barrier = 0;
+static volatile unsigned int barrier = 0;
 
 static void map_fetch(id pid, struct map **ptr)
 {
-    void fetch(id pid, unsigned type, void *p);
-    fetch(pid, (unsigned)type, ptr);
+    void fetch(id pid, unsigned int type, void *p);
+    fetch(pid, (unsigned int)type, ptr);
 }
 
 static void clean()
@@ -336,7 +336,7 @@ void map_new(id *map)
     build(*map, key_null);
 }
 
-void map_get_size(id map, unsigned *size)
+void map_get_size(id map, unsigned int *size)
 {
     struct map *raw;
     
@@ -378,7 +378,7 @@ void map_remove(id map, key k)
     __remove(raw, k);
 }
 
-void map_iterate(id map, unsigned index, key *k, id *object)
+void map_iterate(id map, unsigned int index, key *k, id *object)
 {
     struct map *raw;
 

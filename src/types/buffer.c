@@ -5,12 +5,12 @@
 struct buffer
 {
     unsigned char *ptr;
-    unsigned len;
-    unsigned reserved;
+    unsigned int len;
+    unsigned int reserved;
 };
 make_type(buffer);
 
-static inline void __realloc(struct buffer *p, const unsigned size)
+static inline void __realloc(struct buffer *p, const unsigned int size)
 {
     if (p->reserved < size) {
         p->reserved = size;
@@ -22,7 +22,7 @@ static void load_file(struct buffer *p, const char *path)
 {
     id fid;
     unsigned char buf[8192];
-    unsigned count;
+    unsigned int count;
 
     file_new(&fid);
     file_open(fid, path);
@@ -71,7 +71,7 @@ void buffer_erase(id pid)
     raw->len = 0;
 }
 
-void buffer_reserve(id pid, unsigned len)
+void buffer_reserve(id pid, unsigned int len)
 {
     struct buffer *raw;
 
@@ -89,7 +89,7 @@ void buffer_append_file(id pid, const char *path)
     load_file(raw, path);
 }
 
-void buffer_append(id pid, const void *buf, const unsigned len)
+void buffer_append(id pid, const void *buf, const unsigned int len)
 {
     struct buffer *raw;
 
@@ -184,7 +184,7 @@ end:
     ;
 }
 
-void buffer_get_length(id pid, unsigned *len)
+void buffer_get_length(id pid, unsigned int *len)
 {
     struct buffer *raw;
 
@@ -193,7 +193,7 @@ void buffer_get_length(id pid, unsigned *len)
     *len = raw->len;
 }
 
-void buffer_get_length_with_stride(id pid, unsigned stride, unsigned *len)
+void buffer_get_length_with_stride(id pid, unsigned int stride, unsigned int *len)
 {
     struct buffer *raw;
 
@@ -202,10 +202,10 @@ void buffer_get_length_with_stride(id pid, unsigned stride, unsigned *len)
     *len = raw->len / stride;
 }
 
-void buffer_cut_with_stride(id pid, unsigned stride, unsigned index)
+void buffer_cut_with_stride(id pid, unsigned int stride, unsigned int index)
 {
     struct buffer *raw;
-    unsigned slen;
+    unsigned int slen;
 
     buffer_fetch(pid, &raw);
     assert(raw != NULL && stride > 0);
@@ -219,10 +219,10 @@ void buffer_cut_with_stride(id pid, unsigned stride, unsigned index)
     raw->len -= stride;
 }
 
-void buffer_get_with_stride(id pid, unsigned stride, unsigned index, void *mem)
+void buffer_get_with_stride(id pid, unsigned int stride, unsigned int index, void *mem)
 {
     struct buffer *raw;
-    unsigned slen;
+    unsigned int slen;
 
     buffer_fetch(pid, &raw);
     assert(raw != NULL && stride > 0);
@@ -233,7 +233,7 @@ void buffer_get_with_stride(id pid, unsigned stride, unsigned index, void *mem)
     memcpy(mem, (char *)raw->ptr + index * stride, stride);
 }
 
-void buffer_replace(id pid, const void *search, const unsigned slen, const void *replace, const unsigned rlen)
+void buffer_replace(id pid, const void *search, const unsigned int slen, const void *replace, const unsigned int rlen)
 {
     struct buffer *raw;
     const char *s, *r;

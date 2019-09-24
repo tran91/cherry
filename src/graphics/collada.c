@@ -76,8 +76,8 @@ struct collada_skin
     id bone_names;
     id id;
 
-    unsigned bones_per_vertex;
-    unsigned bones_upload;
+    unsigned int bones_per_vertex;
+    unsigned int bones_upload;
 
     id transform;
     
@@ -202,7 +202,7 @@ static void collada_amature_add_bone(id pid, id bid)
     struct collada_amature *p;
     struct collada_bone *b;
     const char *ptr;
-    unsigned len;
+    unsigned int len;
 
     collada_amature_fetch(pid, &p);
     collada_bone_fetch(bid, &b);
@@ -234,8 +234,8 @@ struct collada_node
     id bone_names;
     id id;
 
-    unsigned bones_per_vertex;
-    unsigned bones_upload;
+    unsigned int bones_per_vertex;
+    unsigned int bones_upload;
 
     id transform;
 
@@ -317,13 +317,13 @@ static void __parse_geometry(struct collada_context *p, id xn_geometry)
 	int i, j;
 	int positions_offset = 0, normals_offset = 0, texcoords_offset = 0, colors_offset = 0;
     const int *ps_ptr;
-    unsigned ps_len;
+    unsigned int ps_len;
     const float *float_ptr;
     const char *ptr;
-    unsigned ptr_len;
+    unsigned int ptr_len;
     float max_f;
     int max_i;
-    unsigned count1, count2, inputs;
+    unsigned int count1, count2, inputs;
 
     /* init local buffers */
     buffer_new(&positions);
@@ -486,7 +486,7 @@ static void __parse_geometry(struct collada_context *p, id xn_geometry)
 static void __parse_library_geometries(struct collada_context *p, id xn)
 {
     id query, xn_geometry;
-    unsigned index;
+    unsigned int index;
 
     xml_query_new(&query);
     xml_query_search(query, xn, "//library_geometries/geometry");
@@ -516,15 +516,15 @@ static void __parse_controller(struct collada_context *p, id xn_controller)
     const char *start, *end;
     id temp;
     int i, j, vcount_max, ii, vcount_i;
-    unsigned count;
+    unsigned int count;
     const char *ptr;
-    unsigned ptr_len;
+    unsigned int ptr_len;
     const float *ptr_float;
-    unsigned ptr_float_len;
+    unsigned int ptr_float_len;
     const int *ptr_int;
-    unsigned ptr_int_len;
+    unsigned int ptr_int_len;
     const int *ptr2_int;
-    unsigned ptr2_int_len;
+    unsigned int ptr2_int_len;
     float max_f, f;
 
     buffer_new(&weights);
@@ -742,7 +742,7 @@ static void __parse_controller(struct collada_context *p, id xn_controller)
 static void __parse_library_controllers(struct collada_context *p, id xn)
 {
     id query, xn_controller;
-    unsigned index;
+    unsigned int index;
 
     xml_query_new(&query);
     xml_query_search(query, xn, "//library_controllers/controller");
@@ -768,7 +768,7 @@ static void load_bone(id bone, id amature, id xn)
 	id xn_matrix, xn_node;
 	int i;
     const char *ptr;
-    unsigned ptr_len;
+    unsigned int ptr_len;
 
     collada_bone_fetch(bone, &rb);
     assert(rb != NULL);
@@ -818,7 +818,7 @@ static void __parse_node_amature(struct collada_context *p, id xn_node)
 	id attr_id;
 	int i;
     const char *ptr;
-    unsigned ptr_len;
+    unsigned int ptr_len;
 
     xml_query_new(&query);
 
@@ -870,7 +870,7 @@ static void __parse_node_visual(id node, struct collada_context *p, id xn_node)
 	id attr_id, attr_url;
 	int i;
     const char *ptr;
-    unsigned ptr_len;
+    unsigned int ptr_len;
 
     xml_query_new(&query);
     collada_node_fetch(node, &rnode);
@@ -966,7 +966,7 @@ static void __parse_visual_scene(struct collada_context *p, id xn_visual_scene)
 {
 	id xn_node, query, sub_query, node;
 	int i;
-    unsigned len;
+    unsigned int len;
 
     xml_query_new(&query);
     xml_query_new(&sub_query);
@@ -1015,11 +1015,11 @@ static void __parse_library_visual_scenes(struct collada_context *p, id xn)
  * animation
  */
 static void __animation_get_bone(struct collada_context *p,
-	const char *bkey, const unsigned bkey_len, id *bone)
+	const char *bkey, const unsigned int bkey_len, id *bone)
 {
     struct collada_amature *ramature;
     id amature;
-    unsigned index;
+    unsigned int index;
     key k;
 
     index = 0;
@@ -1041,15 +1041,15 @@ static void __parse_animation(struct collada_context *p, id xn)
     id query;
 	id xn_float_array;
 	id attr_count, attr_target;
-	unsigned count;
+	unsigned int count;
 	const char *start, *end;
     const char *ptr;
-    unsigned ptr_len;
+    unsigned int ptr_len;
     const float *float_ptr;
 	id bone;
 	id fa;
     id m;
-	unsigned i;
+	unsigned int i;
 
     xml_query_new(&query);
 
@@ -1141,7 +1141,7 @@ void collada_context_get_node(id pid, const char *name, id *nid)
     map_get(rctx->nodes, key_chars(name), nid);
 }
 
-void collada_node_get_vertice(id pid, const float **ptr, unsigned *len)
+void collada_node_get_vertice(id pid, const float **ptr, unsigned int *len)
 {
     struct collada_node *rn;
 
@@ -1152,7 +1152,7 @@ void collada_node_get_vertice(id pid, const float **ptr, unsigned *len)
     buffer_get_length_with_stride(rn->vertices, sizeof(float), len);
 }
 
-void collada_node_get_normals(id pid, const float **ptr, unsigned *len)
+void collada_node_get_normals(id pid, const float **ptr, unsigned int *len)
 {
     struct collada_node *rn;
 
@@ -1163,7 +1163,7 @@ void collada_node_get_normals(id pid, const float **ptr, unsigned *len)
     buffer_get_length_with_stride(rn->normals, sizeof(float), len);
 }
 
-void collada_node_get_texcoords(id pid, const float **ptr, unsigned *len)
+void collada_node_get_texcoords(id pid, const float **ptr, unsigned int *len)
 {
     struct collada_node *rn;
 
@@ -1179,7 +1179,7 @@ void collada_node_get_texcoords(id pid, const float **ptr, unsigned *len)
     }
 }
 
-void collada_node_get_colors(id pid, const float **ptr, unsigned *len)
+void collada_node_get_colors(id pid, const float **ptr, unsigned int *len)
 {
     struct collada_node *rn;
 
@@ -1205,7 +1205,7 @@ void collada_node_get_transform(id pid, id mid)
     mat4_set_mat4(mid, rn->transform);
 }
 
-void collada_node_get_bones_id(id pid, const float **ptr, unsigned *len)
+void collada_node_get_bones_id(id pid, const float **ptr, unsigned int *len)
 {
     struct collada_node *rn;
 
@@ -1221,7 +1221,7 @@ void collada_node_get_bones_id(id pid, const float **ptr, unsigned *len)
     }
 }
 
-void collada_node_get_weights(id pid, const float **ptr, unsigned *len)
+void collada_node_get_weights(id pid, const float **ptr, unsigned int *len)
 {
     struct collada_node *rn;
 
@@ -1237,7 +1237,7 @@ void collada_node_get_weights(id pid, const float **ptr, unsigned *len)
     }
 }
 
-void collada_node_get_bones_per_vertex(id pid, unsigned *v)
+void collada_node_get_bones_per_vertex(id pid, unsigned int *v)
 {
     struct collada_node *rn;
 
@@ -1247,7 +1247,7 @@ void collada_node_get_bones_per_vertex(id pid, unsigned *v)
     *v = rn->bones_per_vertex;
 }
 
-void collada_node_get_bones_upload(id pid, unsigned *v)
+void collada_node_get_bones_upload(id pid, unsigned int *v)
 {
     struct collada_node *rn;
 

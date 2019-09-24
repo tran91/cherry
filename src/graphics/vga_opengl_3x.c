@@ -34,73 +34,73 @@
     #include <GL/glext.h>
 #endif
 
-const unsigned VGA_FLOAT = GL_FLOAT;
-const unsigned VGA_INT = GL_INT;
+const unsigned int VGA_FLOAT = GL_FLOAT;
+const unsigned int VGA_INT = GL_INT;
 
-const unsigned VGA_ARRAY = GL_ARRAY_BUFFER;
-const unsigned VGA_ELEMENT = GL_ELEMENT_ARRAY_BUFFER;
+const unsigned int VGA_ARRAY = GL_ARRAY_BUFFER;
+const unsigned int VGA_ELEMENT = GL_ELEMENT_ARRAY_BUFFER;
 
-const unsigned VGA_STATIC = GL_STATIC_DRAW;
-const unsigned VGA_DYNAMIC = GL_DYNAMIC_DRAW;
-const unsigned VGA_STREAM = GL_STREAM_DRAW;
+const unsigned int VGA_STATIC = GL_STATIC_DRAW;
+const unsigned int VGA_DYNAMIC = GL_DYNAMIC_DRAW;
+const unsigned int VGA_STREAM = GL_STREAM_DRAW;
 
-const unsigned VGA_TRIANGLES = GL_TRIANGLES;
+const unsigned int VGA_TRIANGLES = GL_TRIANGLES;
 
-const unsigned VGA_ALWAYS = GL_ALWAYS;
-const unsigned VGA_NEVER = GL_NEVER;
-const unsigned VGA_LESS = GL_LESS;
-const unsigned VGA_EQUAL = GL_EQUAL;
-const unsigned VGA_LEQUAL = GL_LEQUAL;
-const unsigned VGA_GREATER = GL_GREATER;
-const unsigned VGA_NOTEQUAL = GL_NOTEQUAL;
-const unsigned VGA_GEQUAL = GL_GEQUAL;
+const unsigned int VGA_ALWAYS = GL_ALWAYS;
+const unsigned int VGA_NEVER = GL_NEVER;
+const unsigned int VGA_LESS = GL_LESS;
+const unsigned int VGA_EQUAL = GL_EQUAL;
+const unsigned int VGA_LEQUAL = GL_LEQUAL;
+const unsigned int VGA_GREATER = GL_GREATER;
+const unsigned int VGA_NOTEQUAL = GL_NOTEQUAL;
+const unsigned int VGA_GEQUAL = GL_GEQUAL;
 
-const unsigned VGA_KEEP = GL_KEEP;
-const unsigned VGA_REPLACE = GL_REPLACE;
-const unsigned VGA_INCR = GL_INCR;
-const unsigned VGA_INCR_WRAP = GL_INCR_WRAP;
-const unsigned VGA_DECR = GL_DECR;
-const unsigned VGA_DECR_WRAP = GL_DECR_WRAP;
-const unsigned VGA_INVERT = GL_INVERT;
+const unsigned int VGA_KEEP = GL_KEEP;
+const unsigned int VGA_REPLACE = GL_REPLACE;
+const unsigned int VGA_INCR = GL_INCR;
+const unsigned int VGA_INCR_WRAP = GL_INCR_WRAP;
+const unsigned int VGA_DECR = GL_DECR;
+const unsigned int VGA_DECR_WRAP = GL_DECR_WRAP;
+const unsigned int VGA_INVERT = GL_INVERT;
 
-const unsigned VGA_ZERO = GL_ZERO;
-const unsigned VGA_ONE = GL_ONE;
-const unsigned VGA_SRC_COLOR = GL_SRC_COLOR;
-const unsigned VGA_ONE_MINUS_SRC_COLOR = GL_ONE_MINUS_SRC_COLOR;
-const unsigned VGA_DST_COLOR = GL_DST_COLOR;
-const unsigned VGA_ONE_MINUS_DST_COLOR = GL_ONE_MINUS_DST_COLOR;
-const unsigned VGA_SRC_ALPHA = GL_SRC_ALPHA;
-const unsigned VGA_ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA;
-const unsigned VGA_DST_ALPHA = GL_DST_ALPHA;
-const unsigned VGA_ONE_MINUS_DST_ALPHA = GL_ONE_MINUS_DST_ALPHA;
-const unsigned VGA_CONSTANT_COLOR = GL_CONSTANT_COLOR;
-const unsigned VGA_ONE_MINUS_CONSTANT_COLOR = GL_ONE_MINUS_CONSTANT_COLOR;
-const unsigned VGA_CONSTANT_ALPHA = GL_CONSTANT_ALPHA;
-const unsigned VGA_ONE_MINUS_CONSTANT_ALPHA = GL_ONE_MINUS_CONSTANT_ALPHA;
+const unsigned int VGA_ZERO = GL_ZERO;
+const unsigned int VGA_ONE = GL_ONE;
+const unsigned int VGA_SRC_COLOR = GL_SRC_COLOR;
+const unsigned int VGA_ONE_MINUS_SRC_COLOR = GL_ONE_MINUS_SRC_COLOR;
+const unsigned int VGA_DST_COLOR = GL_DST_COLOR;
+const unsigned int VGA_ONE_MINUS_DST_COLOR = GL_ONE_MINUS_DST_COLOR;
+const unsigned int VGA_SRC_ALPHA = GL_SRC_ALPHA;
+const unsigned int VGA_ONE_MINUS_SRC_ALPHA = GL_ONE_MINUS_SRC_ALPHA;
+const unsigned int VGA_DST_ALPHA = GL_DST_ALPHA;
+const unsigned int VGA_ONE_MINUS_DST_ALPHA = GL_ONE_MINUS_DST_ALPHA;
+const unsigned int VGA_CONSTANT_COLOR = GL_CONSTANT_COLOR;
+const unsigned int VGA_ONE_MINUS_CONSTANT_COLOR = GL_ONE_MINUS_CONSTANT_COLOR;
+const unsigned int VGA_CONSTANT_ALPHA = GL_CONSTANT_ALPHA;
+const unsigned int VGA_ONE_MINUS_CONSTANT_ALPHA = GL_ONE_MINUS_CONSTANT_ALPHA;
 
-const unsigned VGA_FRONT = GL_FRONT;
-const unsigned VGA_BACK = GL_BACK;
-const unsigned VGA_CCW = GL_CCW;
-const unsigned VGA_CW = GL_CW;
+const unsigned int VGA_FRONT = GL_FRONT;
+const unsigned int VGA_BACK = GL_BACK;
+const unsigned int VGA_CCW = GL_CCW;
+const unsigned int VGA_CW = GL_CW;
 
-const unsigned VGA_FALSE = GL_FALSE;
-const unsigned VGA_TRUE = GL_TRUE;
+const unsigned int VGA_FALSE = GL_FALSE;
+const unsigned int VGA_TRUE = GL_TRUE;
 
-const unsigned VGA_RGBA = GL_RGBA;
-const unsigned VGA_RGB = GL_RGB;
-const unsigned VGA_RED = GL_RED;
+const unsigned int VGA_RGBA = GL_RGBA;
+const unsigned int VGA_RGB = GL_RGB;
+const unsigned int VGA_RED = GL_RED;
 
-const unsigned VGA_CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE;
-const unsigned VGA_REPEAT = GL_REPEAT;
+const unsigned int VGA_CLAMP_TO_EDGE = GL_CLAMP_TO_EDGE;
+const unsigned int VGA_REPEAT = GL_REPEAT;
 
 /*
  * attribute
  */
 struct vga_attribute
 {
-    unsigned glid;
+    unsigned int glid;
     char created;
-    unsigned target;
+    unsigned int target;
 };
 make_type(vga_attribute);
 
@@ -120,7 +120,7 @@ static void vga_attribute_clear(struct vga_attribute *p)
     p->target = GL_ARRAY_BUFFER;
 }
 
-void vga_attribute_fill(id pid, const void *buf, const unsigned size, const unsigned usage)
+void vga_attribute_fill(id pid, const void *buf, const unsigned int size, const unsigned int usage)
 {
     struct vga_attribute *raw;
 
@@ -132,7 +132,7 @@ void vga_attribute_fill(id pid, const void *buf, const unsigned size, const unsi
     glBindBuffer(raw->target, 0);
 }
 
-void vga_attribute_replace(id pid, const unsigned offset, const void *buf, const unsigned size)
+void vga_attribute_replace(id pid, const unsigned int offset, const void *buf, const unsigned int size)
 {
     struct vga_attribute *raw;
 
@@ -149,7 +149,7 @@ void vga_attribute_replace(id pid, const unsigned offset, const void *buf, const
  */
 struct vga_attribute_group
 {
-    unsigned glid;
+    unsigned int glid;
     char created;
     id map;
 };
@@ -171,11 +171,11 @@ static void vga_attribute_group_clear(struct vga_attribute_group *p)
     release(p->map);
 }
 
-void vga_attribute_group_set(id pid, id attr, const char *name, const unsigned index, signed data_type, signed size, unsigned normalized, signed stride, unsigned offset)
+void vga_attribute_group_set(id pid, id attr, const char *name, const unsigned int index, signed data_type, signed size, unsigned int normalized, signed stride, unsigned int offset)
 {
     struct vga_attribute_group *raw;
     struct vga_attribute *a_raw;
-    unsigned index;
+    unsigned int index;
 
     vga_attribute_group_fetch(pid, &raw);
     vga_attribute_fetch(attr, &a_raw);
@@ -196,9 +196,9 @@ void vga_attribute_group_set(id pid, id attr, const char *name, const unsigned i
  */
 struct vga_texture
 {
-    unsigned glid;    
-    unsigned width;
-    unsigned height;
+    unsigned int glid;    
+    unsigned int width;
+    unsigned int height;
     char created;
 };
 make_type(vga_texture);
@@ -222,7 +222,7 @@ static void vga_texture_clear(struct vga_texture *p)
     }
 }
 
-void vga_texture_get_width(id pid, unsigned *width)
+void vga_texture_get_width(id pid, unsigned int *width)
 {
     struct vga_texture *raw;
 
@@ -232,7 +232,7 @@ void vga_texture_get_width(id pid, unsigned *width)
     *width = raw->width;
 }
 
-void vga_texture_get_height(id pid, unsigned *height)
+void vga_texture_get_height(id pid, unsigned int *height)
 {
     struct vga_texture *raw;
 
@@ -242,7 +242,7 @@ void vga_texture_get_height(id pid, unsigned *height)
     *height = raw->height;
 }
 
-void vga_texture_set_wrap(id pid, unsigned s, unsigned t)
+void vga_texture_set_wrap(id pid, unsigned int s, unsigned int t)
 {
     struct vga_texture *raw;
 
@@ -261,7 +261,7 @@ void vga_texture_load_file(id pid, const char *path)
 {
     struct vga_texture *raw;
     id img;
-    unsigned channels;
+    unsigned int channels;
     const unsigned char *ptr;
 
     vga_texture_fetch(pid, &raw);
@@ -294,7 +294,7 @@ void vga_texture_load_file(id pid, const char *path)
     release(img);
 }
 
-void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned internal_format, unsigned format, const void *ptr)
+void vga_texture_load_raw(id pid, unsigned int width, unsigned int height, unsigned int internal_format, unsigned int format, const void *ptr)
 {
     struct vga_texture *raw;
 
@@ -328,9 +328,9 @@ void vga_texture_load_raw(id pid, unsigned width, unsigned height, unsigned inte
  */
 struct vga_renderbuffer
 {
-    unsigned glid;
-    unsigned width;
-    unsigned height;
+    unsigned int glid;
+    unsigned int width;
+    unsigned int height;
     char created;
 };
 make_type(vga_renderbuffer);
@@ -358,23 +358,23 @@ static void vga_renderbuffer_clear(struct vga_renderbuffer *p)
  */
 struct vga_framebuffer
 {
-    unsigned width;
-    unsigned height;
+    unsigned int width;
+    unsigned int height;
 
     struct {
-        unsigned glid;
-        unsigned created;
+        unsigned int glid;
+        unsigned int created;
         id mtexs;
         id vtexs;
     } resolver;
 
     struct {
-        unsigned glid;
-        unsigned created;
+        unsigned int glid;
+        unsigned int created;
         id mrens;
         id vrens;
-        unsigned samples;
-        unsigned build_samples;
+        unsigned int samples;
+        unsigned int build_samples;
     } sampler;
 
     id vnames;
@@ -443,9 +443,9 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
     struct vga_texture *vtx;
     int i, flag;
     id tex, name, ren;
-    unsigned len;
+    unsigned int len;
     const char *ptr;
-    unsigned attachments[32] = {GL_NONE};
+    unsigned int attachments[32] = {GL_NONE};
 
     if (p->width == 0 || p->height == 0) return;
 
@@ -640,7 +640,7 @@ static void vga_framebuffer_build(struct vga_framebuffer *p)
     p->depth_stencil_complete = 1;
 }
 
-void vga_framebuffer_set_size(id pid, unsigned width, unsigned height)
+void vga_framebuffer_set_size(id pid, unsigned int width, unsigned int height)
 {
     struct vga_framebuffer *raw;
 
@@ -735,9 +735,9 @@ void vga_framebuffer_begin(id pid)
 void vga_framebuffer_end(id pid)
 {
     struct vga_framebuffer *raw;
-    unsigned len;
+    unsigned int len;
     int i;
-    unsigned draw[32] = {GL_NONE};
+    unsigned int draw[32] = {GL_NONE};
 
     vga_framebuffer_fetch(pid, &raw);
     assert(raw != NULL);
@@ -772,9 +772,9 @@ void vga_framebuffer_end(id pid)
  */
 struct vga_screen
 {
-    unsigned glid;
-    unsigned width;
-    unsigned height;
+    unsigned int glid;
+    unsigned int width;
+    unsigned int height;
 };
 make_type(vga_screen);
 
@@ -790,7 +790,7 @@ static void vga_screen_clear(struct vga_screen *p)
 
 }
 
-void vga_screen_set_size(id pid, unsigned width, unsigned height)
+void vga_screen_set_size(id pid, unsigned int width, unsigned int height)
 {
     struct vga_screen *raw;
 
@@ -801,7 +801,7 @@ void vga_screen_set_size(id pid, unsigned width, unsigned height)
     raw->height = height;
 }
 
-void vga_screen_get_size(id pid, unsigned *width, unsigned *height)
+void vga_screen_get_size(id pid, unsigned int *width, unsigned int *height)
 {
     struct vga_screen *raw;
 
@@ -812,7 +812,7 @@ void vga_screen_get_size(id pid, unsigned *width, unsigned *height)
     *height = raw->height;
 }
 
-void vga_screen_set_glid(id pid, unsigned glid)
+void vga_screen_set_glid(id pid, unsigned int glid)
 {
     struct vga_screen *raw;
 
@@ -822,7 +822,7 @@ void vga_screen_set_glid(id pid, unsigned glid)
     raw->glid = glid;
 }
 
-static void vga_screen_get_glid(id pid, unsigned *glid)
+static void vga_screen_get_glid(id pid, unsigned int *glid)
 {
     struct vga_screen *raw;
 
@@ -837,9 +837,9 @@ static void vga_screen_get_glid(id pid, unsigned *glid)
  */
 struct vga_screenbuffer
 {
-    unsigned glid;
-    unsigned width;
-    unsigned height;
+    unsigned int glid;
+    unsigned int width;
+    unsigned int height;
     id scr;
 };
 make_type(vga_screenbuffer);
@@ -906,7 +906,7 @@ static id current_program = id_null;
 
 struct vga_program
 {
-    unsigned glid;
+    unsigned int glid;
     
     depth_opt depth;
     stencil_opt stencil;
@@ -968,7 +968,7 @@ void vga_program_load(id pid, const char *vert_path, const char *frag_path)
 {
     struct vga_program *raw;
     id vbuf, fbuf;
-    unsigned vs, fs, vf;
+    unsigned int vs, fs, vf;
     const char *ptr;
     signed r;
     char info[512];
@@ -1056,7 +1056,7 @@ static void end(id pid)
     struct vga_texture *tex;
     key k;
     id obj;
-    unsigned index;
+    unsigned int index;
 
     struct vga_program *raw;
 
@@ -1122,7 +1122,7 @@ static void end(id pid)
     }
 }
 
-void vga_program_draw_array(id pid, id group, unsigned mode, int first, int count)
+void vga_program_draw_array(id pid, id group, unsigned int mode, int first, int count)
 {
     struct vga_attribute_group *vag;
 
@@ -1177,7 +1177,7 @@ void vga_program_set_uniform_float(id pid, float value, const char *name, const 
     glUniform1f(i, value);
 }
 
-void vga_program_set_uniform_float_array(id pid, float *value, unsigned count, const char *name, const signed index)
+void vga_program_set_uniform_float_array(id pid, float *value, unsigned int count, const char *name, const signed index)
 {
     struct vga_program *raw;
     int i;
@@ -1233,7 +1233,7 @@ void vga_program_set_uniform_vec4_scalar(id pid, float x, float y, float z, floa
     glUniform4f(i, x, y, z, w);
 }
 
-void vga_program_set_uniform_vec4_array(id pid, float *value, unsigned count, const char *name, const signed index)
+void vga_program_set_uniform_vec4_array(id pid, float *value, unsigned int count, const char *name, const signed index)
 {
     struct vga_program *raw;
     int i;
@@ -1321,7 +1321,7 @@ void vga_program_set_uniform_mat4(id pid, id vid, const char *name, const signed
     glUniformMatrix4fv(i, 1, 0, m);
 }
 
-void vga_program_bind_attribute_location(id pid, const char *name, const unsigned index)
+void vga_program_bind_attribute_location(id pid, const char *name, const unsigned int index)
 {
     struct vga_program *raw;
 
@@ -1382,7 +1382,7 @@ void vga_program_set_cull(id pid, const cull_opt opt)
     raw->cull = opt;
 }
 
-void vga_get_max_texture_size(unsigned *size)
+void vga_get_max_texture_size(unsigned int *size)
 {
     GLint v;
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &v);
@@ -1390,14 +1390,14 @@ void vga_get_max_texture_size(unsigned *size)
 }
 
 
-void vga_get_max_vertex_uniform_vectors(unsigned *size)
+void vga_get_max_vertex_uniform_vectors(unsigned int *size)
 {
     GLint v;
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &v);
     *size = v;
 }
 
-void vga_get_max_fragment_uniform_vectors(unsigned *size)
+void vga_get_max_fragment_uniform_vectors(unsigned int *size)
 {
     GLint v;
     glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &v);

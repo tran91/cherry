@@ -47,8 +47,8 @@ struct ecs_system
 {
     id sid;
     void(*update)(id, id, float);
-    void(*check)(id, id, unsigned);
-    void(*listen)(id, id, unsigned);
+    void(*check)(id, id, unsigned int);
+    void(*listen)(id, id, unsigned int);
 };
 make_type(ecs_system);
 
@@ -120,7 +120,7 @@ void ecs_context_get_system(id ctx, signed type, id *sid)
     }
 }
 
-void ecs_context_add_system(id ctx, id sid, void(*update)(id, id, float), void(*check)(id, id, unsigned), void(*listen)(id, id, unsigned))
+void ecs_context_add_system(id ctx, id sid, void(*update)(id, id, float), void(*check)(id, id, unsigned int), void(*listen)(id, id, unsigned int))
 {
     struct ecs_context *rctx;
     signed tp;
@@ -142,7 +142,7 @@ void ecs_context_add_system(id ctx, id sid, void(*update)(id, id, float), void(*
     release(s);
 }
 
-void ecs_context_get_component(id ctx, unsigned entity, signed type, id *cid)
+void ecs_context_get_component(id ctx, unsigned int entity, signed type, id *cid)
 {
     struct ecs_context *rctx;
     struct ecs_entity *re;
@@ -158,7 +158,7 @@ void ecs_context_get_component(id ctx, unsigned entity, signed type, id *cid)
     map_get(re->components, key_mem(&type, sizeof(type)), cid);
 }
 
-void ecs_context_add_component(id ctx, unsigned entity, id cid)
+void ecs_context_add_component(id ctx, unsigned int entity, id cid)
 {
     struct ecs_context *rctx;
     struct ecs_entity *re;
@@ -176,11 +176,11 @@ void ecs_context_add_component(id ctx, unsigned entity, id cid)
     map_set(re->components, key_mem(&tp, sizeof(tp)), cid);
 }
 
-void ecs_context_check_entity(id ctx, unsigned entity)
+void ecs_context_check_entity(id ctx, unsigned int entity)
 {
     struct ecs_context *rctx;
     struct ecs_system *rs;
-    unsigned index;
+    unsigned int index;
     id s;
     key k;
 
@@ -197,20 +197,20 @@ void ecs_context_check_entity(id ctx, unsigned entity)
     }
 }
 
-void ecs_context_new_entity(id ctx, unsigned *entity)
+void ecs_context_new_entity(id ctx, unsigned int *entity)
 {
     struct ecs_context *rctx;
     id eid;
-    unsigned len;
+    unsigned int len;
 
     ecs_context_fetch(ctx, &rctx);
     assert(rctx != NULL);
 
-    buffer_get_length_with_stride(rctx->entities.recycled, sizeof(unsigned), &len);
+    buffer_get_length_with_stride(rctx->entities.recycled, sizeof(unsigned int), &len);
     if (len > 0) {
         /* find recycled entity */
-        buffer_get_with_stride(rctx->entities.recycled, sizeof(unsigned), len - 1, entity);
-        buffer_cut_with_stride(rctx->entities.recycled, sizeof(unsigned), len - 1);
+        buffer_get_with_stride(rctx->entities.recycled, sizeof(unsigned int), len - 1, entity);
+        buffer_cut_with_stride(rctx->entities.recycled, sizeof(unsigned int), len - 1);
         ecs_entity_new(&eid);
         vector_set(rctx->entities.indexes, *entity, eid);
         release(eid);
@@ -223,12 +223,12 @@ void ecs_context_new_entity(id ctx, unsigned *entity)
     }
 }
 
-void ecs_context_remove_entity(id ctx, unsigned entity)
+void ecs_context_remove_entity(id ctx, unsigned int entity)
 {
     struct ecs_context *rctx;
     struct ecs_entity *re;
     id eid;
-    unsigned len;
+    unsigned int len;
 
     ecs_context_fetch(ctx, &rctx);
     assert(rctx != NULL);
@@ -246,20 +246,20 @@ void ecs_context_remove_entity(id ctx, unsigned entity)
     }
 }
 
-void ecs_context_new_signal(id ctx, unsigned *signal)
+void ecs_context_new_signal(id ctx, unsigned int *signal)
 {
     struct ecs_context *rctx;
     id sid;
-    unsigned len;
+    unsigned int len;
 
     ecs_context_fetch(ctx, &rctx);
     assert(rctx != NULL);
 
-    buffer_get_length_with_stride(rctx->signals.recycled, sizeof(unsigned), &len);
+    buffer_get_length_with_stride(rctx->signals.recycled, sizeof(unsigned int), &len);
     if (len > 0) {
         /* find recycled signal */
-        buffer_get_with_stride(rctx->signals.recycled, sizeof(unsigned), len - 1, signal);
-        buffer_cut_with_stride(rctx->signals.recycled, sizeof(unsigned), len - 1);
+        buffer_get_with_stride(rctx->signals.recycled, sizeof(unsigned int), len - 1, signal);
+        buffer_cut_with_stride(rctx->signals.recycled, sizeof(unsigned int), len - 1);
         ecs_signal_new(&sid);
         vector_set(rctx->signals.indexes, *signal, sid);
         release(sid);
@@ -272,7 +272,7 @@ void ecs_context_new_signal(id ctx, unsigned *signal)
     }
 }
 
-void ecs_context_add_event(id ctx, unsigned signal, id eid)
+void ecs_context_add_event(id ctx, unsigned int signal, id eid)
 {
     struct ecs_context *rctx;
     struct ecs_signal *rs;
@@ -290,7 +290,7 @@ void ecs_context_add_event(id ctx, unsigned signal, id eid)
     map_set(rs->events, key_mem(&tp, sizeof(tp)), eid);
 }
 
-void ecs_context_get_event(id ctx, unsigned signal, signed type, id *eid)
+void ecs_context_get_event(id ctx, unsigned int signal, signed type, id *eid)
 {
     struct ecs_context *rctx;
     struct ecs_signal *rs;
@@ -306,11 +306,11 @@ void ecs_context_get_event(id ctx, unsigned signal, signed type, id *eid)
     map_get(rs->events, key_mem(&type, sizeof(type)), eid);
 }
 
-void ecs_context_broadcast_signal(id ctx, unsigned signal)
+void ecs_context_broadcast_signal(id ctx, unsigned int signal)
 {
     struct ecs_context *rctx;
     struct ecs_system *rs;
-    unsigned index, len;
+    unsigned int index, len;
     id s;
     key k;
 
@@ -343,7 +343,7 @@ void ecs_context_update(id ctx, float delta)
 {
     struct ecs_context *rctx;
     struct ecs_system *rs;
-    unsigned index;
+    unsigned int index;
     id s;
     key k;
 

@@ -93,8 +93,8 @@ finish:
 static char do_wait = 0;
 static struct {
     pthread_t *start;
-    unsigned len;
-    volatile unsigned barrier;
+    unsigned int len;
+    volatile unsigned int barrier;
 } tids = {NULL, 0, 0};
 
 static void wait()

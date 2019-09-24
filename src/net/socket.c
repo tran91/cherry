@@ -29,8 +29,8 @@
 #include <openssl/err.h>
 #include <openssl/conf.h>
 
-static volatile unsigned init_ssl = 0;
-static volatile unsigned ssl_barrier = 0;
+static volatile unsigned int init_ssl = 0;
+static volatile unsigned int ssl_barrier = 0;
 
 static void __clear_ssl()
 {
@@ -136,7 +136,7 @@ static void ssl_context_new_server(id *pid, const char *cert, const char *key)
 struct socket
 {
     char *address;
-    unsigned port;
+    unsigned int port;
 
     int sd;
     SSL *ssl;
@@ -196,7 +196,7 @@ static void socket_set_non_blocking(id pid, int *flags)
     raw->non_blocking = 1;
 }
 
-void socket_connect(id pid, const char *address, const unsigned port)
+void socket_connect(id pid, const char *address, const unsigned int port)
 {
     struct addrinfo hints, *servinfo = NULL, *p;
     int rv;
@@ -251,7 +251,7 @@ finish:
     }
 }
 
-void socket_connect_ssl(id pid, const char *address, const unsigned port)
+void socket_connect_ssl(id pid, const char *address, const unsigned int port)
 {
     struct socket *raw;
     struct ssl_context *sc;
@@ -296,7 +296,7 @@ void socket_connect_ssl(id pid, const char *address, const unsigned port)
     }
 }
 
-void socket_bind(id pid, const unsigned port)
+void socket_bind(id pid, const unsigned int port)
 {
     struct socket *raw;
     struct addrinfo hints, *servinfo = NULL, *p;
@@ -371,7 +371,7 @@ finish:
     }
 }
 
-void socket_bind_ssl(id pid, const unsigned port, const char *cert, const char *key)
+void socket_bind_ssl(id pid, const unsigned int port, const char *cert, const char *key)
 {
     struct socket *raw;
 
@@ -394,7 +394,7 @@ void socket_bind_ssl(id pid, const unsigned port, const char *cert, const char *
 void socket_send(id pid, const char *buf, signed len, signed *ret)
 {
     struct socket *raw;
-    unsigned total = 0;
+    unsigned int total = 0;
     int bytesleft = len;
     int n;
 

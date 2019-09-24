@@ -1,6 +1,6 @@
 #include "cmath.h"
 
-static inline void __set_scalar(const unsigned n, float * restrict l, const float r)
+static inline void __set_scalar(const unsigned int n, float * restrict l, const float r)
 {
     int i;
     for(i = 0; i < n; ++i) {

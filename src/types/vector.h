@@ -40,7 +40,7 @@ void vector_push(id pid, id cid);
  */
 void vector_push_vector(id pid, id cid);
 
-void vector_set(id pid, unsigned index, id cid);
+void vector_set(id pid, unsigned int index, id cid);
 
 /*
  * @pid: vector
@@ -59,7 +59,7 @@ void vector_set(id pid, unsigned index, id cid);
  *          ...
  *      }
  */
-void vector_get(id pid, unsigned index, id *cid);
+void vector_get(id pid, unsigned int index, id *cid);
 
 /*
  * @pid: vector
@@ -72,7 +72,7 @@ void vector_get(id pid, unsigned index, id *cid);
  * 
  *      vector_remove(v, 0);
  */
-void vector_remove(id pid, unsigned index);
+void vector_remove(id pid, unsigned int index);
 
 /*
  * @pid: vector
@@ -104,7 +104,7 @@ void vector_remove_id(id pid, id obj);
  * 
  *      vector_swap(v, 0, 2);
  */
-void vector_swap(id pid, unsigned idx1, unsigned idx2);
+void vector_swap(id pid, unsigned int idx1, unsigned int idx2);
 
 /*
  * @pid: vector
@@ -117,7 +117,7 @@ void vector_swap(id pid, unsigned idx1, unsigned idx2);
  * 
  *      vector_bring_to_back(v, 0);
  */
-void vector_bring_to_back(id pid, unsigned index);
+void vector_bring_to_back(id pid, unsigned int index);
 
 /*
  * @pid: vector
@@ -130,7 +130,7 @@ void vector_bring_to_back(id pid, unsigned index);
  * 
  *      vector_bring_to_front(v, 9);
  */
-void vector_bring_to_front(id pid, unsigned index);
+void vector_bring_to_front(id pid, unsigned int index);
 
 /*
  * @pid: vector
@@ -141,10 +141,10 @@ void vector_bring_to_front(id pid, unsigned index);
  * 
  *      ...
  * 
- *      unsigned s;
+ *      unsigned int s;
  *      vector_get_size(v, &s);
  */
-void vector_get_size(id pid, unsigned *s);
+void vector_get_size(id pid, unsigned int *s);
 
 /*
  * @pid: vector

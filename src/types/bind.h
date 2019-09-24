@@ -33,7 +33,7 @@ type(bind);
  *      bind_new(&bid);
  *      bind_set(bid, sizeof(struct your_data), your_data_init, your_data_clear);
  */
-void bind_set(id pid, unsigned size, void(*pinit)(void*), void(*pclear)(void*));
+void bind_set(id pid, unsigned int size, void(*pinit)(void*), void(*pclear)(void*));
 
 /*
  * @pid: bind
@@ -44,7 +44,7 @@ void bind_set(id pid, unsigned size, void(*pinit)(void*), void(*pclear)(void*));
  *      bind_new(&bid);
  *      bind_set_raw(bid, &d, sizeof(struct your_data));
  */
-void bind_set_raw(id pid, void *copy, unsigned size);
+void bind_set_raw(id pid, void *copy, unsigned int size);
 
 /*
  * @pid: bind

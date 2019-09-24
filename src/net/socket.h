@@ -33,7 +33,7 @@ type(socket);
  *      socket_connect(sock, "www.cphilosophy.com", 5000);
  * 
  */
-void socket_connect(id pid, const char *address, const unsigned port);
+void socket_connect(id pid, const char *address, const unsigned int port);
 
 /*
  * @pid: socket
@@ -43,7 +43,7 @@ void socket_connect(id pid, const char *address, const unsigned port);
  *      socket_new(&sock);
  *      socket_bind(sock, 5000);
  */
-void socket_bind(id pid, const unsigned port);
+void socket_bind(id pid, const unsigned int port);
 
 /*
  * @pid: socket
@@ -59,7 +59,7 @@ void socket_bind(id pid, const unsigned port);
  *      socket_connect_ssl(sock, "www.cphilosophy.com", 5000);
  * 
  */
-void socket_connect_ssl(id pid, const char *address, const unsigned port);
+void socket_connect_ssl(id pid, const char *address, const unsigned int port);
 
 /*
  * @pid: socket
@@ -69,7 +69,7 @@ void socket_connect_ssl(id pid, const char *address, const unsigned port);
  *      socket_new(&sock);
  *      socket_bind_ssl(sock, 5000, "res/cert.pem", "res/private.pem");
  */
-void socket_bind_ssl(id pid, const unsigned port, const char *cert, const char *key);
+void socket_bind_ssl(id pid, const unsigned int port, const char *cert, const char *key);
 
 /*
  * @pid: socket

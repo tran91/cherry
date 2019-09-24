@@ -3,7 +3,7 @@
 struct vector
 {
     id *start;
-    unsigned len;
+    unsigned int len;
 };
 make_type(vector);
 
@@ -61,7 +61,7 @@ void vector_push_vector(id pid, id cid)
     r1->len += r2->len;
 }
 
-void vector_set(id pid, unsigned index, id cid)
+void vector_set(id pid, unsigned int index, id cid)
 {    
     struct vector *raw;
     id oid;
@@ -84,7 +84,7 @@ void vector_set(id pid, unsigned index, id cid)
     release(oid);
 }
 
-void vector_get(id pid, unsigned index, id *cid)
+void vector_get(id pid, unsigned int index, id *cid)
 {
     struct vector *raw;
     
@@ -107,7 +107,7 @@ void vector_remove_all(id pid)
     vector_clear(raw);
 }
 
-void vector_remove(id pid, unsigned index)
+void vector_remove(id pid, unsigned int index)
 {
     struct vector *raw;
     id cid;
@@ -147,7 +147,7 @@ void vector_remove_id(id pid, id obj)
     }
 }
 
-void vector_swap(id pid, unsigned idx1, unsigned idx2)
+void vector_swap(id pid, unsigned int idx1, unsigned int idx2)
 {
     struct vector *raw;
     id cid;
@@ -162,7 +162,7 @@ void vector_swap(id pid, unsigned idx1, unsigned idx2)
     raw->start[idx2] = cid;
 }
 
-void vector_get_size(id pid, unsigned *s)
+void vector_get_size(id pid, unsigned int *s)
 {
     struct vector *raw;
     
@@ -172,7 +172,7 @@ void vector_get_size(id pid, unsigned *s)
     *s = raw->len;
 }
 
-void vector_bring_to_back(id pid, unsigned index)
+void vector_bring_to_back(id pid, unsigned int index)
 {
     struct vector *raw;
     id cid;
@@ -187,7 +187,7 @@ void vector_bring_to_back(id pid, unsigned index)
     raw->start[raw->len - 1] = cid;
 }
 
-void vector_bring_to_front(id pid, unsigned index)
+void vector_bring_to_front(id pid, unsigned int index)
 {
     struct vector *raw;
     id cid;

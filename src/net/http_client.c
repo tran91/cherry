@@ -24,7 +24,7 @@ static void http_client_clear(struct http_client *p)
 static void read_url(id link, char address[257], unsigned short *port, char path[8193], unsigned char *ssl)
 {
     const char *str, *t, *bl;
-    unsigned len;
+    unsigned int len;
     char sport[10];
 
     *port = 80;

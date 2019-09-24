@@ -17,14 +17,14 @@
 #define ARGS(...) __VA_ARGS__
 
 /* spin lock */
-static inline void lock(volatile unsigned *l)
+static inline void lock(volatile unsigned int *l)
 {
     while(__sync_lock_test_and_set(l, 1)) {
         while(*l);
     }
 }
 
-static inline void unlock(volatile unsigned *l)
+static inline void unlock(volatile unsigned int *l)
 {
     __sync_lock_release(l);
 }
@@ -48,7 +48,7 @@ typedef struct key
     union {
         struct {
             const char *ptr;
-            unsigned len;
+            unsigned int len;
         };
         id kid;
     };
@@ -74,8 +74,8 @@ static inline key key_mem(const void *p, size_t len)
 #define id_validate(a) ((a).mask >= 0 && (a).index >= 0)
 
 void invalidate(id *pid);
-void require(void(*init)(void*, key), void(*clear)(void*), unsigned size, signed *type);
-void create(unsigned type, id *pid);
+void require(void(*init)(void*, key), void(*clear)(void*), unsigned int size, signed *type);
+void create(unsigned int type, id *pid);
 void which(id pid, signed *type);
 void build(id pid, key k);
 void retain(id pid);
@@ -105,14 +105,14 @@ static void name##_clean()\
     release(name##_cache);\
 }\
 static signed name##_type = -1;\
-static volatile unsigned name##_barrier = 0;\
+static volatile unsigned int name##_barrier = 0;\
 struct name;\
 static void name##_init(struct name *s, key k);\
 static void name##_clear(struct name *s);\
 static void name##_fetch(id pid, struct name **ptr)\
 {\
-    void fetch(id pid, unsigned type, void *p);\
-    fetch(pid, (unsigned)name##_type, ptr);\
+    void fetch(id pid, unsigned int type, void *p);\
+    fetch(pid, (unsigned int)name##_type, ptr);\
 }\
 void name##_shared(key k, id *pid)\
 {\
@@ -154,14 +154,14 @@ static void name##_clean()\
     release(name##_cache);\
 }\
 static signed name##_type = -1;\
-static volatile unsigned name##_barrier = 0;\
+static volatile unsigned int name##_barrier = 0;\
 struct name;\
 static void name##_init(struct name *s, key k);\
 static void name##_clear(struct name *s);\
 static void name##_fetch(id pid, struct name **ptr)\
 {\
-    void fetch(id pid, unsigned type, void *p);\
-    fetch(pid, (unsigned)name##_type, ptr);\
+    void fetch(id pid, unsigned int type, void *p);\
+    fetch(pid, (unsigned int)name##_type, ptr);\
 }\
 static void name##_shared(key k, id *pid)\
 {\

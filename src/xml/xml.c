@@ -79,7 +79,7 @@ void xml_node_add_attribute(id pid, id aid)
 	struct xml_node *rp, *ocp;
 	struct xml_attribute *rc;
 	const char *ptr;
-	unsigned len;
+	unsigned int len;
 
 	xml_attribute_fetch(aid, &rc);
 	assert(rc != NULL);
@@ -99,7 +99,7 @@ void xml_node_add_attribute(id pid, id aid)
 	release(aid);
 }
 
-void xml_node_get_attribute_by_index(id pid, unsigned index, id *aid)
+void xml_node_get_attribute_by_index(id pid, unsigned int index, id *aid)
 {
 	struct xml_node *r;
 	key k;
@@ -118,7 +118,7 @@ void xml_node_get_attribute_by_name(id pid, const char *name, id *aid)
 	map_get(r->attributes, key_chars(name), aid);
 }
 
-static void __xml_node_set_name(id pid, const char *name, const unsigned name_len)
+static void __xml_node_set_name(id pid, const char *name, const unsigned int name_len)
 {
 	struct xml_node *r;
 
@@ -133,7 +133,7 @@ void xml_node_set_name(id pid, const char *name)
 	__xml_node_set_name(pid, name, strlen(name));
 }
 
-static void __xml_node_set_value(id pid, const char *value, const unsigned value_len)
+static void __xml_node_set_value(id pid, const char *value, const unsigned int value_len)
 {
 	struct xml_node *r;
 
@@ -148,7 +148,7 @@ void xml_node_set_value(id pid, const char *value)
 	__xml_node_set_value(pid, value, strlen(value));
 }
 
-void xml_node_get_name(id pid, const char * const *ptr, unsigned *len)
+void xml_node_get_name(id pid, const char * const *ptr, unsigned int *len)
 {
 	struct xml_node *r;
 
@@ -158,7 +158,7 @@ void xml_node_get_name(id pid, const char * const *ptr, unsigned *len)
 	buffer_get_length(r->name, len);
 }
 
-void xml_node_get_value(id pid, const char * const *ptr, unsigned *len)
+void xml_node_get_value(id pid, const char * const *ptr, unsigned int *len)
 {
 	struct xml_node *r;
 
@@ -184,12 +184,12 @@ static void xml_attribute_clear(struct xml_attribute *p)
 	release(p->value);
 }
 
-void __xml_attribute_set_name(id pid, const char *name, const unsigned name_len)
+void __xml_attribute_set_name(id pid, const char *name, const unsigned int name_len)
 {
 	struct xml_attribute *r;
 	struct xml_node *rp;
 	const char *ptr;
-	unsigned len;
+	unsigned int len;
 
 	xml_attribute_fetch(pid, &r);
 	assert(r != NULL);
@@ -214,7 +214,7 @@ void xml_attribute_set_name(id pid, const char *name)
 	__xml_attribute_set_name(pid, name, strlen(name));
 }
 
-void __xml_attribute_set_value(id pid, const char *value, const unsigned value_len)
+void __xml_attribute_set_value(id pid, const char *value, const unsigned int value_len)
 {
 	struct xml_attribute *r;
 
@@ -229,7 +229,7 @@ void xml_attribute_set_value(id pid, const char *value)
 	__xml_attribute_set_value(pid, value, strlen(value));
 }
 
-void xml_attribute_get_name(id pid, const char * const *ptr, unsigned *len)
+void xml_attribute_get_name(id pid, const char * const *ptr, unsigned int *len)
 {
 	struct xml_attribute *r;
 
@@ -239,7 +239,7 @@ void xml_attribute_get_name(id pid, const char * const *ptr, unsigned *len)
 	buffer_get_length(r->name, len);
 }
 
-void xml_attribute_get_value(id pid, const char * const *ptr, unsigned *len)
+void xml_attribute_get_value(id pid, const char * const *ptr, unsigned int *len)
 {
 	struct xml_attribute *r;
 
@@ -254,7 +254,7 @@ void xml_attribute_get_value(id pid, const char * const *ptr, unsigned *len)
  */
 static const char *null = (const char[2]){'\0', '\0'};
 
-static inline void __set_reverse(const unsigned n,
+static inline void __set_reverse(const unsigned int n,
 	const char **restrict l, const char * restrict r)
 {
 	int i;
@@ -667,10 +667,10 @@ void xml_node_load_file(id pid, const char *path)
 	struct xml_attribute *a;
 	key k;
 	id obj;
-	unsigned index;
+	unsigned int index;
 	id buf;
 	const char *ptr;
-	unsigned len;
+	unsigned int len;
 
 	xml_node_fetch(pid, &raw);
 	assert(raw != NULL);
@@ -731,7 +731,7 @@ static void xml_query_clear(struct xml_query *p)
 	release(p->vattrs);
 }
 
-void xml_query_get_node(id pid, unsigned index, id *nid)
+void xml_query_get_node(id pid, unsigned int index, id *nid)
 {
 	struct xml_query *raw;
 
@@ -740,7 +740,7 @@ void xml_query_get_node(id pid, unsigned index, id *nid)
 	vector_get(raw->vnodes, index, nid);
 }
 
-void xml_query_get_node_length(id pid, unsigned *len)
+void xml_query_get_node_length(id pid, unsigned int *len)
 {
 	struct xml_query *raw;
 
@@ -749,7 +749,7 @@ void xml_query_get_node_length(id pid, unsigned *len)
 	vector_get_size(raw->vnodes, len);
 }
 
-void xml_query_get_attribute(id pid, unsigned index, id *aid)
+void xml_query_get_attribute(id pid, unsigned int index, id *aid)
 {
 	struct xml_query *raw;
 
@@ -758,7 +758,7 @@ void xml_query_get_attribute(id pid, unsigned index, id *aid)
 	vector_get(raw->vattrs, index, aid);
 }
 
-void xml_query_get_attribute_length(id pid, unsigned *len)
+void xml_query_get_attribute_length(id pid, unsigned int *len)
 {
 	struct xml_query *raw;
 
@@ -928,12 +928,12 @@ finish:
 	;
 }
 
-static void __fetch_attribute_name(struct xml_query *raw, const char *name, const unsigned name_len)
+static void __fetch_attribute_name(struct xml_query *raw, const char *name, const unsigned int name_len)
 {
 	id set, n, a, t;
 	int i, j;
 	const char *ptr;
-	unsigned ptr_len;
+	unsigned int ptr_len;
 
 	map_new(&set);
 	vector_remove_all(raw->vattrs);
@@ -1014,12 +1014,12 @@ static void __keep_node_has_at_least_one_attribute(struct xml_query *raw)
 }
 
 static void __keep_node_has_at_least_one_attribute_with_value(
-	struct xml_query *raw, const char *value, const unsigned value_len)
+	struct xml_query *raw, const char *value, const unsigned int value_len)
 {
 	id n, a;
 	int i, j;
 	const char *ptr;
-	unsigned ptr_len;
+	unsigned int ptr_len;
 
 	vector_remove_all(raw->vattrs);
 
@@ -1044,12 +1044,12 @@ static void __keep_node_has_at_least_one_attribute_with_value(
 	}
 }
 
-static void __keep_node_has_attribute(struct xml_query *raw, const char *name, const unsigned name_len)
+static void __keep_node_has_attribute(struct xml_query *raw, const char *name, const unsigned int name_len)
 {
 	id n, a;
 	int i, j;
 	const char *ptr;
-	unsigned ptr_len;
+	unsigned int ptr_len;
 
 	vector_remove_all(raw->vattrs);
 
@@ -1075,13 +1075,13 @@ static void __keep_node_has_attribute(struct xml_query *raw, const char *name, c
 }
 
 static void __keep_node_has_attribute_with_value(struct xml_query *raw,
-	const char *name, const unsigned name_len, 
-	const char *value, const unsigned value_len)
+	const char *name, const unsigned int name_len, 
+	const char *value, const unsigned int value_len)
 {
 	id n, a;
 	int i, j;
 	const char *ptr;
-	unsigned ptr_len;
+	unsigned int ptr_len;
 
 	vector_remove_all(raw->vattrs);
 
@@ -1140,12 +1140,12 @@ static void __move_to_parent(struct xml_query *raw)
 	release(set);
 }
 
-static void __get_all_children_has_name(struct xml_query *raw, const char *name, const unsigned name_len)
+static void __get_all_children_has_name(struct xml_query *raw, const char *name, const unsigned int name_len)
 {
 	id set, v, n, c, t;
 	int i, j;
 	const char *ptr;
-	unsigned ptr_len;
+	unsigned int ptr_len;
 	struct xml_node *rn;
 
 	vector_remove_all(raw->vattrs);
@@ -1215,13 +1215,13 @@ static void __get_all_children(struct xml_query *raw)
 	release(v);
 }
 
-static void __get_all_children_has_name_recursive(struct xml_query *raw, const char *name, const unsigned name_len)
+static void __get_all_children_has_name_recursive(struct xml_query *raw, const char *name, const unsigned int name_len)
 {
 	id set, check, v, n, c, t;
 	int i, j;
 	struct xml_node *rn;
 	const char *ptr;
-	unsigned ptr_len;
+	unsigned int ptr_len;
 
 	vector_remove_all(raw->vattrs);
 	map_new(&set);
@@ -1333,7 +1333,7 @@ void xml_query_search(id pid, id nid, const char *command)
 	const char *name[2], *value[2];
 	int sub;
 	unsigned char recursive;
-	unsigned len;
+	unsigned int len;
 	id n;
 
 	xml_query_fetch(pid, &raw);

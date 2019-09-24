@@ -38,11 +38,11 @@ void collada_context_get_node(id pid, const char *name, id *nid);
  * example:
  *      id node;
  *      const char *fptr;
- *      unsigned flen;
+ *      unsigned int flen;
  * 
  *      collada_node_get_vertice(node, &fptr, &flen);
  */
-void collada_node_get_vertice(id pid, const float **ptr, unsigned *len);
+void collada_node_get_vertice(id pid, const float **ptr, unsigned int *len);
 
 /*
  * @pid: collada_node
@@ -50,11 +50,11 @@ void collada_node_get_vertice(id pid, const float **ptr, unsigned *len);
  * example:
  *      id node;
  *      const char *fptr;
- *      unsigned flen;
+ *      unsigned int flen;
  * 
  *      collada_node_get_normals(node, &fptr, &flen);
  */
-void collada_node_get_normals(id pid, const float **ptr, unsigned *len);
+void collada_node_get_normals(id pid, const float **ptr, unsigned int *len);
 
 /*
  * @pid: collada_node
@@ -62,11 +62,11 @@ void collada_node_get_normals(id pid, const float **ptr, unsigned *len);
  * example:
  *      id node;
  *      const char *fptr;
- *      unsigned flen;
+ *      unsigned int flen;
  * 
  *      collada_node_get_texcoords(node, &fptr, &flen);
  */
-void collada_node_get_texcoords(id pid, const float **ptr, unsigned *len);
+void collada_node_get_texcoords(id pid, const float **ptr, unsigned int *len);
 
 /*
  * @pid: collada_node
@@ -74,11 +74,11 @@ void collada_node_get_texcoords(id pid, const float **ptr, unsigned *len);
  * example:
  *      id node;
  *      const char *fptr;
- *      unsigned flen;
+ *      unsigned int flen;
  * 
  *      collada_node_get_colors(node, &fptr, &flen);
  */
-void collada_node_get_colors(id pid, const float **ptr, unsigned *len);
+void collada_node_get_colors(id pid, const float **ptr, unsigned int *len);
 
 /*
  * @pid: collada_node
@@ -95,22 +95,22 @@ void collada_node_get_transform(id pid, id mid);
 /*
  * @pid: collada_node
  */
-void collada_node_get_bones_id(id pid, const float **ptr, unsigned *len);
+void collada_node_get_bones_id(id pid, const float **ptr, unsigned int *len);
 
 /*
  * @pid: collada_node
  */
-void collada_node_get_weights(id pid, const float **ptr, unsigned *len);
+void collada_node_get_weights(id pid, const float **ptr, unsigned int *len);
 
 /*
  * @pid: collada_node
  */
-void collada_node_get_bones_per_vertex(id pid, unsigned *v);
+void collada_node_get_bones_per_vertex(id pid, unsigned int *v);
 
 /*
  * @pid: collada_node
  */
-void collada_node_get_bones_upload(id pid, unsigned *v);
+void collada_node_get_bones_upload(id pid, unsigned int *v);
 
 /*
  * @pid: collada_node

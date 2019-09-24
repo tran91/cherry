@@ -10,7 +10,7 @@
 void map_shared(key k, id *map);
 void map_new(id *map);
 
-void map_get_size(id map, unsigned *size);
+void map_get_size(id map, unsigned int *size);
 
 /*
  * @map: map
@@ -68,7 +68,7 @@ void map_remove(id map, key k);
  * 
  *      ...
  * 
- *      unsigned index;
+ *      unsigned int index;
  *      key k;
  *      id obj;
  *      
@@ -80,7 +80,7 @@ void map_remove(id map, key k);
  *          map_iterate(map, index, &k, &obj);
  *      }
  */
-void map_iterate(id map, unsigned index, key *k, id *object);
+void map_iterate(id map, unsigned int index, key *k, id *object);
 
 /*
  * @map: map
